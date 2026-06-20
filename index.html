@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 FIFA World Cup Predictor</title>
+    <title>Polla Mundial 2026 - Predictor</title>
     <meta name="description" content="Predict scores for the 2026 FIFA World Cup hosted by USA, Canada & Mexico. Compete with friends on the leaderboard!">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,1640 +13,1036 @@
             theme: {
                 extend: {
                     colors: {
-                        wc: {
-                            navy: '#030712',
-                            dark: '#0f172a',
-                            card: '#1e293b',
-                            border: '#334155',
-                            blue: '#1e40af',
-                            red: '#dc2626',
-                            gold: '#f59e0b',
-                            green: '#10b981',
-                        }
+                        wc: { navy:'#030712', dark:'#0f172a', card:'#1e293b', border:'#334155', blue:'#1e40af', red:'#dc2626', gold:'#f59e0b', green:'#10b981' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                    },
+                    fontFamily: { sans:['Inter','system-ui','-apple-system','sans-serif'] },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'slide-up': 'slideUp 0.4s ease-out',
-                        'pulse-gold': 'pulseGold 2s infinite',
-                        'shimmer': 'shimmer 2s linear infinite',
+                        'fade-in':'fadeIn .4s ease-out','slide-up':'slideUp .4s ease-out',
+                        'pulse-gold':'pulseGold 2s infinite','shimmer':'shimmer 2s linear infinite',
                     },
                     keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        pulseGold: { '0%,100%': { boxShadow: '0 0 0 0 rgba(245,158,11,0.4)' }, '50%': { boxShadow: '0 0 0 10px rgba(245,158,11,0)' } },
-                        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+                        fadeIn:{'0%':{opacity:'0'},'100%':{opacity:'1'}},
+                        slideUp:{'0%':{opacity:'0',transform:'translateY(20px)'},'100%':{opacity:'1',transform:'translateY(0)'}},
+                        pulseGold:{'0%,100%':{boxShadow:'0 0 0 0 rgba(245,158,11,.4)'},'50%':{boxShadow:'0 0 0 10px rgba(245,158,11,0)'}},
+                        shimmer:{'0%':{backgroundPosition:'-200% 0'},'100%':{backgroundPosition:'200% 0'}},
                     }
                 }
             }
         }
     </script>
-
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Firebase SDKs (Compat for single-file simplicity) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, sans-serif; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-        /* Glass Card Effect */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-        }
-
-        /* Gradient Backgrounds */
-        .bg-hero {
-            background: radial-gradient(ellipse at top, #1e3a5f 0%, #030712 60%);
-        }
-        .bg-gradient-gold {
-            background: linear-gradient(135deg, #f59e0b, #d97706, #b45309);
-        }
-        .bg-gradient-blue {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a, #172554);
-        }
-
-        /* Tab Active Indicator */
-        .tab-active {
-            position: relative;
-        }
-        .tab-active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #f59e0b, #d97706);
-            border-radius: 3px 3px 0 0;
-        }
-
-        /* Flag Image */
-        .flag-img {
-            width: 32px;
-            height: 24px;
-            object-fit: cover;
-            border-radius: 3px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        .flag-img-lg {
-            width: 48px;
-            height: 36px;
-            object-fit: cover;
-            border-radius: 4px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        }
-
-        /* Score Input */
-        .score-input {
-            width: 56px;
-            height: 44px;
-            text-align: center;
-            font-size: 1.25rem;
-            font-weight: 700;
-            background: rgba(15, 23, 42, 0.8);
-            border: 2px solid #334155;
-            border-radius: 8px;
-            color: #f1f5f9;
-            transition: all 0.2s;
-        }
-        .score-input:focus {
-            outline: none;
-            border-color: #f59e0b;
-            box-shadow: 0 0 0 3px rgba(245,158,11,0.2);
-        }
-        .score-input:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: rgba(15, 23, 42, 0.4);
-        }
-
-        /* Match Card Hover */
-        .match-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .match-card:hover:not(.match-locked) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        /* Loading Shimmer */
-        .shimmer-bg {
-            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
-            background-size: 200% 100%;
-            animation: shimmer 2s linear infinite;
-        }
-
-        /* Trophy Glow */
-        .trophy-glow {
-            filter: drop-shadow(0 0 12px rgba(245,158,11,0.5));
-        }
-
-        /* Group Collapsible */
-        .group-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out;
-        }
-        .group-content.expanded {
-            max-height: 3000px;
-            transition: max-height 0.6s ease-in;
-        }
-
-        /* Toast */
-        .toast-enter {
-            animation: slideUp 0.3s ease-out;
-        }
-
-        /* Lock Overlay */
-        .lock-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(3, 7, 18, 0.5);
-            backdrop-filter: blur(1px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: inherit;
-            z-index: 10;
-        }
-
-        /* Ranking Badge */
-        .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); }
-        .rank-3 { background: linear-gradient(135deg, #b45309, #92400e); }
-
-        /* Responsive table */
-        .leaderboard-table { min-width: 600px; }
-
-        @media (max-width: 640px) {
-            .flag-img { width: 24px; height: 18px; }
-            .score-input { width: 48px; height: 40px; font-size: 1.1rem; }
-        }
+        *{box-sizing:border-box}body{font-family:'Inter',system-ui,sans-serif}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0f172a}
+        ::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#64748b}
+        .glass-card{background:rgba(30,41,59,.6);backdrop-filter:blur(12px);border:1px solid rgba(51,65,85,.5)}
+        .bg-hero{background:radial-gradient(ellipse at top,#1e3a5f 0%,#030712 60%)}
+        .bg-gradient-gold{background:linear-gradient(135deg,#f59e0b,#d97706,#b45309)}
+        .bg-gradient-blue{background:linear-gradient(135deg,#1e40af,#1e3a8a,#172554)}
+        .tab-active{position:relative}
+        .tab-active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:3px;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:3px 3px 0 0}
+        .flag-img{width:32px;height:24px;object-fit:cover;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+        .flag-img-lg{width:48px;height:36px;object-fit:cover;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+        .score-input{width:56px;height:44px;text-align:center;font-size:1.25rem;font-weight:700;background:rgba(15,23,42,.8);border:2px solid #334155;border-radius:8px;color:#f1f5f9;transition:all .2s}
+        .score-input:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2)}
+        .score-input:disabled{opacity:.4;cursor:not-allowed;background:rgba(15,23,42,.4)}
+        .match-card{transition:transform .2s,box-shadow .2s}
+        .match-card:hover:not(.match-locked){transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
+        .shimmer-bg{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:shimmer 2s linear infinite}
+        .trophy-glow{filter:drop-shadow(0 0 12px rgba(245,158,11,.5))}
+        .group-content{max-height:0;overflow:hidden;transition:max-height .4s ease-out}
+        .group-content.expanded{max-height:5000px;transition:max-height .6s ease-in}
+        .toast-enter{animation:slideUp .3s ease-out}
+        .lock-overlay{position:absolute;inset:0;background:rgba(3,7,18,.5);backdrop-filter:blur(1px);display:flex;align-items:center;justify-content:center;border-radius:inherit;z-index:10}
+        .rank-1{background:linear-gradient(135deg,#f59e0b,#d97706)}.rank-2{background:linear-gradient(135deg,#94a3b8,#64748b)}.rank-3{background:linear-gradient(135deg,#b45309,#92400e)}
+        .leaderboard-table{min-width:600px}
+        @media(max-width:640px){.flag-img{width:24px;height:18px}.score-input{width:48px;height:40px;font-size:1.1rem}}
+        .admin-score-input{width:72px;height:40px;text-align:center;font-size:1rem;font-weight:700;background:rgba(15,23,42,.8);border:2px solid #334155;border-radius:8px;color:#f1f5f9;transition:all .2s}
+        .admin-score-input:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2)}
     </style>
 </head>
 <body class="bg-wc-navy text-gray-100 min-h-screen">
 
-    <!-- ======================== LOGIN SCREEN ======================== -->
-    <div id="login-screen" class="min-h-screen bg-hero flex items-center justify-center px-4">
-        <div class="text-center animate-fade-in max-w-md w-full">
-            <!-- World Cup Trophy Icon -->
-            <div class="mb-8">
-                <i class="fas fa-trophy text-6xl text-wc-gold trophy-glow mb-4 block"></i>
-                <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white mb-2">
-                    World Cup <span class="text-wc-gold">2026</span>
-                </h1>
-                <p class="text-xl text-wc-gold font-semibold tracking-wide uppercase">Predictor</p>
-            </div>
-
-            <!-- Info Cards -->
-            <div class="glass-card rounded-2xl p-6 mb-8 text-left space-y-4">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-futbol text-wc-gold mt-1"></i>
-                    <div>
-                        <p class="text-sm text-gray-300 font-medium">48 Teams &bull; 12 Groups &bull; 104 Matches</p>
-                        <p class="text-xs text-gray-500 mt-1">USA, Canada & Mexico host the biggest World Cup ever</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-star text-wc-gold mt-1"></i>
-                    <div>
-                        <p class="text-sm text-gray-300 font-medium">Predict scores, earn points, climb the leaderboard</p>
-                        <p class="text-xs text-gray-500 mt-1">Exact score = 5 pts &bull; Correct outcome = 3 pts</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-lock text-wc-gold mt-1"></i>
-                    <div>
-                        <p class="text-sm text-gray-300 font-medium">Predictions lock 5 minutes before kickoff</p>
-                        <p class="text-xs text-gray-500 mt-1">Don't miss your chance!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Google Sign-In Button -->
-            <button id="btn-signin" onclick="signInWithGoogle()"
-                class="w-full flex items-center justify-center gap-3 bg-gradient-blue hover:from-blue-700 hover:to-blue-900 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-blue-900/50 hover:scale-[1.02] active:scale-[0.98]">
-                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Sign in with Google
-            </button>
-
-            <p class="text-xs text-gray-600 mt-6">Your predictions are saved securely in the cloud</p>
+<!-- ======================== LOGIN ======================== -->
+<div id="login-screen" class="min-h-screen bg-hero flex items-center justify-center px-4">
+    <div class="text-center animate-fade-in max-w-md w-full">
+        <div class="mb-8">
+            <i class="fas fa-trophy text-6xl text-wc-gold trophy-glow mb-4 block"></i>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white mb-2">World Cup <span class="text-wc-gold">2026</span></h1>
+            <p class="text-xl text-wc-gold font-semibold tracking-wide uppercase">Polla Predictor</p>
         </div>
-    </div>
-
-    <!-- ======================== APP SHELL ======================== -->
-    <div id="app-shell" class="hidden min-h-screen flex flex-col">
-
-        <!-- Top Navigation Bar -->
-        <nav class="sticky top-0 z-40 bg-wc-dark/95 backdrop-blur-md border-b border-wc-border">
-            <div class="max-w-6xl mx-auto px-4">
-                <div class="flex items-center justify-between h-16">
-                    <!-- Logo -->
-                    <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('predictions')">
-                        <i class="fas fa-trophy text-wc-gold text-lg"></i>
-                        <span class="font-bold text-lg hidden sm:block">WC <span class="text-wc-gold">2026</span></span>
-                    </div>
-
-                    <!-- Tab Navigation -->
-                    <div class="flex items-center gap-1">
-                        <button onclick="switchTab('predictions')" id="tab-predictions"
-                            class="tab-btn px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
-                            <i class="fas fa-futbol mr-1.5"></i><span class="hidden sm:inline">Predictions</span>
-                        </button>
-                        <button onclick="switchTab('leaderboard')" id="tab-leaderboard"
-                            class="tab-btn px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
-                            <i class="fas fa-ranking-star mr-1.5"></i><span class="hidden sm:inline">Leaderboard</span>
-                        </button>
-                        <button onclick="switchTab('admin')" id="tab-admin"
-                            class="tab-btn px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5 hidden">
-                            <i class="fas fa-shield-halved mr-1.5"></i><span class="hidden sm:inline">Admin</span>
-                        </button>
-                    </div>
-
-                    <!-- User Menu -->
-                    <div class="flex items-center gap-3">
-                        <div class="hidden sm:flex flex-col items-end">
-                            <span id="user-name" class="text-sm font-semibold text-white"></span>
-                            <span id="user-score" class="text-xs text-wc-gold font-medium"></span>
-                        </div>
-                        <button onclick="handleSignOut()" class="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" title="Sign Out">
-                            <i class="fas fa-right-from-bracket"></i>
-                        </button>
-                    </div>
+        <div class="glass-card rounded-2xl p-6 mb-8 text-left space-y-4">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-futbol text-wc-gold mt-1"></i>
+                <div>
+                    <p class="text-sm text-gray-300 font-medium">48 Teams &bull; 12 Groups &bull; 104 Matches</p>
+                    <p class="text-xs text-gray-500 mt-1">USA, Canada & Mexico host the biggest World Cup ever</p>
                 </div>
             </div>
-        </nav>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
-            <div id="predictions-view"></div>
-            <div id="leaderboard-view" class="hidden"></div>
-            <div id="admin-view" class="hidden"></div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="border-t border-wc-border py-4 text-center text-xs text-gray-600">
-            <p>2026 FIFA World Cup Predictor &bull; Not affiliated with FIFA</p>
-        </footer>
-    </div>
-
-    <!-- ======================== TOAST CONTAINER ======================== -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
-
-    <!-- ======================== LOADING OVERLAY ======================== -->
-    <div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-wc-navy/80 backdrop-blur-sm flex items-center justify-center">
-        <div class="text-center">
-            <i class="fas fa-spinner fa-spin text-4xl text-wc-gold mb-4 block"></i>
-            <p id="loading-text" class="text-gray-300 font-medium">Loading...</p>
+            <div class="flex items-start gap-3">
+                <i class="fas fa-star text-wc-gold mt-1"></i>
+                <div>
+                    <p class="text-sm text-gray-300 font-medium">Predict scores, earn points, climb the leaderboard</p>
+                    <p class="text-xs text-gray-500 mt-1">Exact score = 5 pts &bull; Correct outcome = 3 pts</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <i class="fas fa-lock text-wc-gold mt-1"></i>
+                <div>
+                    <p class="text-sm text-gray-300 font-medium">Predictions lock 5 min before kickoff</p>
+                    <p class="text-xs text-gray-500 mt-1">Don't miss your chance!</p>
+                </div>
+            </div>
         </div>
+        <button id="btn-signin" onclick="signInWithGoogle()"
+            class="w-full flex items-center justify-center gap-3 bg-gradient-blue hover:from-blue-700 hover:to-blue-900 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-blue-900/50 hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Sign in with Google
+        </button>
+        <p class="text-xs text-gray-600 mt-6">Your predictions are saved securely in the cloud</p>
     </div>
+</div>
 
-    <!-- ======================== JAVASCRIPT ======================== -->
-    <script>
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🔧 FIREBASE CONFIGURATION                                      ║
-    // ║  Replace the values below with your Firebase project config    ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    const firebaseConfig = {
-        apiKey: "AIzaSyCkx72rFp0PSiG73KPm56BH_sSM_32hfMA",
-        authDomain: "polla-mundialista-2026-566fc.firebaseapp.com",
-        projectId: "polla-mundialista-2026-566fc",
-        storageBucket: "polla-mundialista-2026-566fc.firebasestorage.app",
-        messagingSenderId: "782089529085",
-        appId: "1:782089529085:web:6fa170f198e6fb838b8094"
-    };
+<!-- ======================== APP SHELL ======================== -->
+<div id="app-shell" class="hidden min-h-screen flex flex-col">
+    <nav class="sticky top-0 z-40 bg-wc-dark/95 backdrop-blur-md border-b border-wc-border">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('predictions')">
+                    <i class="fas fa-trophy text-wc-gold text-lg"></i>
+                    <span class="font-bold text-lg hidden sm:block">WC <span class="text-wc-gold">2026</span></span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="switchTab('predictions')" id="tab-predictions" class="tab-btn px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                        <i class="fas fa-futbol mr-1.5"></i><span class="hidden sm:inline">Predictions</span>
+                    </button>
+                    <button onclick="switchTab('leaderboard')" id="tab-leaderboard" class="tab-btn px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                        <i class="fas fa-ranking-star mr-1.5"></i><span class="hidden sm:inline">Leaderboard</span>
+                    </button>
+                    <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5 hidden">
+                        <i class="fas fa-shield-halved mr-1.5"></i><span class="hidden sm:inline">Admin</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex flex-col items-end">
+                        <span id="user-name" class="text-sm font-semibold text-white"></span>
+                        <span id="user-score" class="text-xs text-wc-gold font-medium"></span>
+                    </div>
+                    <button onclick="handleSignOut()" class="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" title="Sign Out">
+                        <i class="fas fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
+        <div id="predictions-view"></div>
+        <div id="leaderboard-view" class="hidden"></div>
+        <div id="admin-view" class="hidden"></div>
+    </main>
+    <footer class="border-t border-wc-border py-4 text-center text-xs text-gray-600">
+        <p>Polla Mundial 2026 &bull; Not affiliated with FIFA</p>
+    </footer>
+</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+<!-- TOAST -->
+<div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🔐 ADMIN UID                                                   ║
-    // ║  Replace with your Firebase Auth UID (find it in Firebase       ║
-    // ║  Console > Authentication > Users)                               ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    const ADMIN_UID = 'tXLS1rtHObQTTQtGzPygYSG8bNj1';
+<!-- LOADING -->
+<div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-wc-navy/80 backdrop-blur-sm flex items-center justify-center">
+    <div class="text-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-wc-gold mb-4 block"></i>
+        <p id="loading-text" class="text-gray-300 font-medium">Loading...</p>
+    </div>
+</div>
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  ⚽ 2026 FIFA WORLD CUP TOURNAMENT DATA                         ║
-    // ║  Based on the December 2024 Final Draw. Verify & update teams   ║
-    // ║  if qualification results change before the tournament.          ║
-    // ╚══════════════════════════════════════════════════════════════════╝
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  FIREBASE CONFIG — Replace with YOUR values                      ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const firebaseConfig = {
+    apiKey: "PASTE_YOUR_API_KEY_HERE",
+    authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "PASTE_YOUR_PROJECT_ID",
+    storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "PASTE_YOUR_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    // Country → ISO 2-letter code (for flagcdn.com)
-    const COUNTRY_CODES = {
-        'USA': 'us', 'United States': 'us',
-        'Mexico': 'mx', 'Canada': 'ca',
-        'Morocco': 'ma', 'Peru': 'pe', 'New Zealand': 'nz', 'Chile': 'cl',
-        'Colombia': 'co', 'Ecuador': 'ec', 'Costa Rica': 'cr',
-        'Uruguay': 'uy', 'Senegal': 'sn', 'Panama': 'pa',
-        'Brazil': 'br', 'Denmark': 'dk', 'Serbia': 'rs', 'Jamaica': 'jm',
-        'England': 'gb-eng',
-        'Japan': 'jp', 'Ghana': 'gh', 'Trinidad and Tobago': 'tt', 'Trinidad & Tobago': 'tt',
-        'Spain': 'es', 'Iran': 'ir', 'Egypt': 'eg', 'Uzbekistan': 'uz',
-        'France': 'fr', 'Austria': 'at', 'Tunisia': 'tn', 'Honduras': 'hn',
-        'Portugal': 'pt', 'Croatia': 'hr', 'Nigeria': 'ng', 'Guatemala': 'gt',
-        'Netherlands': 'nl', 'Switzerland': 'ch', 'Australia': 'au', 'Jordan': 'jo',
-        'Germany': 'de', 'South Korea': 'kr', 'Poland': 'pl', 'UAE': 'ae',
-        'Belgium': 'be', 'Italy': 'it', 'Cameroon': 'cm', 'Oman': 'om',
-        'Argentina': 'ar', 'Saudi Arabia': 'sa', 'Bahrain': 'bh',
-        'Scotland': 'gb-sct', 'Wales': 'gb-wls',
-        'TBD': 'un', 'TBD A': 'un', 'TBD B': 'un',
-    };
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  ADMIN UID — Replace with your Firebase Auth UID                ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const ADMIN_UID = 'PASTE_YOUR_ADMIN_UID_HERE';
 
-    // 2026 World Cup Stadiums
-    const VENUES = [
-        { name: 'SoFi Stadium', city: 'Los Angeles', country: 'USA' },
-        { name: 'MetLife Stadium', city: 'New York', country: 'USA' },
-        { name: 'AT&T Stadium', city: 'Dallas', country: 'USA' },
-        { name: 'Hard Rock Stadium', city: 'Miami', country: 'USA' },
-        { name: 'Mercedes-Benz Stadium', city: 'Atlanta', country: 'USA' },
-        { name: 'Lumen Field', city: 'Seattle', country: 'USA' },
-        { name: 'Gillette Stadium', city: 'Boston', country: 'USA' },
-        { name: 'Lincoln Financial Field', city: 'Philadelphia', country: 'USA' },
-        { name: "Levi's Stadium", city: 'San Francisco', country: 'USA' },
-        { name: 'NRG Stadium', city: 'Houston', country: 'USA' },
-        { name: 'Estadio Azteca', city: 'Mexico City', country: 'Mexico' },
-        { name: 'Estadio BBVA', city: 'Monterrey', country: 'Mexico' },
-        { name: 'Estadio Akron', city: 'Guadalajara', country: 'Mexico' },
-        { name: 'BMO Field', city: 'Toronto', country: 'Canada' },
-        { name: 'BC Place', city: 'Vancouver', country: 'Canada' },
-    ];
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  COUNTRY FLAG CODES (ISO 3166-1 alpha-2)                        ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const FLAGS = {
+    'México':'mx','Sudáfrica':'za','Corea del Sur':'kr','Chequia':'cz',
+    'Canadá':'ca','Bosnia y Herzegovina':'ba','Catar':'qa','Suiza':'ch',
+    'Brasil':'br','Marruecos':'ma','Haití':'ht','Escocia':'gb-sct',
+    'Estados Unidos':'us','Paraguay':'py','Australia':'au','Turquía':'tr',
+    'Alemania':'de','Curazao':'cw','Costa de Marfil':'ci','Ecuador':'ec',
+    'Países Bajos':'nl','Japón':'jp','Suecia':'se','Túnez':'tn',
+    'Bélgica':'be','Egipto':'eg','Irán':'ir','Nueva Zelanda':'nz',
+    'España':'es','Cabo Verde':'cv','Arabia Saudita':'sa','Uruguay':'uy',
+    'Francia':'fr','Senegal':'sn','Irak':'iq','Noruega':'no',
+    'Argentina':'ar','Argelia':'dz','Austria':'at','Jordania':'jo',
+    'Portugal':'pt','RD Congo':'cd','Uzbekistán':'uz','Colombia':'co',
+    'Inglaterra':'gb-eng','Croacia':'hr','Ghana':'gh','Panamá':'pa',
+    'TBD':'un',
+};
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  GROUP STAGE DEFINITIONS                                         ║
-    // ║  Pot 1 hosts pre-assigned, then Dec 2024 draw results.         ║
-    // ║  ⚠️  VERIFY & UPDATE with final qualified teams before launch   ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    const GROUPS = {
-        A: ['USA', 'Morocco', 'Peru', 'New Zealand'],
-        B: ['Mexico', 'Colombia', 'Ecuador', 'Costa Rica'],
-        C: ['Canada', 'Uruguay', 'Senegal', 'Panama'],
-        D: ['Brazil', 'Denmark', 'Serbia', 'Jamaica'],
-        E: ['England', 'Japan', 'Ghana', 'Trinidad & Tobago'],
-        F: ['Spain', 'Iran', 'Egypt', 'Uzbekistan'],
-        G: ['France', 'Austria', 'Tunisia', 'Honduras'],
-        H: ['Portugal', 'Croatia', 'Nigeria', 'Guatemala'],
-        I: ['Netherlands', 'Switzerland', 'Australia', 'Jordan'],
-        J: ['Germany', 'South Korea', 'Poland', 'UAE'],
-        K: ['Belgium', 'Italy', 'Cameroon', 'Oman'],
-        L: ['Argentina', 'Saudi Arabia', 'Chile', 'Bahrain'],
-    };
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CORRECT GROUPS — World Cup 2026 Final Draw                     ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const GROUPS = {
+    A: ['México','Sudáfrica','Corea del Sur','Chequia'],
+    B: ['Canadá','Bosnia y Herzegovina','Catar','Suiza'],
+    C: ['Brasil','Marruecos','Haití','Escocia'],
+    D: ['Estados Unidos','Paraguay','Australia','Turquía'],
+    E: ['Alemania','Curazao','Costa de Marfil','Ecuador'],
+    F: ['Países Bajos','Japón','Suecia','Túnez'],
+    G: ['Bélgica','Egipto','Irán','Nueva Zelanda'],
+    H: ['España','Cabo Verde','Arabia Saudita','Uruguay'],
+    I: ['Francia','Senegal','Irak','Noruega'],
+    J: ['Argentina','Argelia','Austria','Jordania'],
+    K: ['Portugal','RD Congo','Uzbekistán','Colombia'],
+    L: ['Inglaterra','Croacia','Ghana','Panamá'],
+};
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  MATCH SCHEDULE GENERATION                                       ║
-    // ║  Generates all 72 group stage matches with dates & venues       ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function generateGroupMatches() {
-        const matches = [];
-        let matchNum = 1;
-        const venueIdx = { us: 0, mx: 0, ca: 0 };
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  COMPLETE MATCH SCHEDULE                                         ║
+// ║  All dates stored in UTC (ET + 4h for June/July EDT)            ║
+// ║  Scores pre-populated for completed matches                       ║
+// ╚══════════════════════════════════════════════════════════════════╝
 
-        const getVenue = (hostKey) => {
-            let venue;
-            if (hostKey === 'mx') {
-                venue = VENUES[10 + (venueIdx.mx % 3)];
-                venueIdx.mx++;
-            } else if (hostKey === 'ca') {
-                venue = VENUES[13 + (venueIdx.ca % 2)];
-                venueIdx.ca++;
-            } else {
-                venue = VENUES[venueIdx.us % 10];
-                venueIdx.us++;
-            }
-            return venue;
-        };
+// Helper: ET to UTC (June = EDT = UTC-4)
+function et(h,m,d){return `2026-${d}T${String(h+4).padStart(2,'0')}:${String(m).padStart(2,'0')}:00Z`;}
 
-        // Matchday date assignments (UTC) — 12 groups, 2 matches each per matchday
-        // Spread across 4 days per matchday, 6 matches per day
-        const matchday1Starts = [
-            new Date('2026-06-11T18:00:00Z'), new Date('2026-06-11T21:00:00Z'),
-            new Date('2026-06-12T14:00:00Z'), new Date('2026-06-12T18:00:00Z'),
-            new Date('2026-06-12T21:00:00Z'), new Date('2026-06-13T18:00:00Z'),
-            new Date('2026-06-13T21:00:00Z'), new Date('2026-06-14T14:00:00Z'),
-            new Date('2026-06-14T18:00:00Z'), new Date('2026-06-14T21:00:00Z'),
-            new Date('2026-06-15T18:00:00Z'), new Date('2026-06-15T21:00:00Z'),
-            new Date('2026-06-16T14:00:00Z'), new Date('2026-06-16T18:00:00Z'),
-            new Date('2026-06-16T21:00:00Z'), new Date('2026-06-17T14:00:00Z'),
-            new Date('2026-06-17T18:00:00Z'), new Date('2026-06-17T21:00:00Z'),
-            new Date('2026-06-18T14:00:00Z'), new Date('2026-06-18T18:00:00Z'),
-            new Date('2026-06-18T21:00:00Z'), new Date('2026-06-19T14:00:00Z'),
-            new Date('2026-06-19T18:00:00Z'), new Date('2026-06-19T21:00:00Z'),
-        ];
-        const matchday2Starts = [
-            new Date('2026-06-17T01:00:00Z'), new Date('2026-06-17T18:00:00Z'),
-            new Date('2026-06-17T21:00:00Z'), new Date('2026-06-18T18:00:00Z'),
-            new Date('2026-06-18T21:00:00Z'), new Date('2026-06-19T18:00:00Z'),
-            new Date('2026-06-19T21:00:00Z'), new Date('2026-06-20T14:00:00Z'),
-            new Date('2026-06-20T18:00:00Z'), new Date('2026-06-20T21:00:00Z'),
-            new Date('2026-06-21T18:00:00Z'), new Date('2026-06-21T21:00:00Z'),
-            new Date('2026-06-22T14:00:00Z'), new Date('2026-06-22T18:00:00Z'),
-            new Date('2026-06-22T21:00:00Z'), new Date('2026-06-23T14:00:00Z'),
-            new Date('2026-06-23T18:00:00Z'), new Date('2026-06-23T21:00:00Z'),
-            new Date('2026-06-24T18:00:00Z'), new Date('2026-06-24T21:00:00Z'),
-            new Date('2026-06-25T14:00:00Z'), new Date('2026-06-25T18:00:00Z'),
-            new Date('2026-06-25T21:00:00Z'), new Date('2026-06-26T14:00:00Z'),
-        ];
-        const matchday3Starts = [
-            new Date('2026-06-23T01:00:00Z'), new Date('2026-06-23T21:00:00Z'),
-            new Date('2026-06-24T21:00:00Z'), new Date('2026-06-25T21:00:00Z'),
-            new Date('2026-06-26T21:00:00Z'), new Date('2026-06-27T14:00:00Z'),
-            new Date('2026-06-27T18:00:00Z'), new Date('2026-06-27T21:00:00Z'),
-            new Date('2026-06-28T14:00:00Z'), new Date('2026-06-28T18:00:00Z'),
-            new Date('2026-06-28T21:00:00Z'), new Date('2026-06-29T14:00:00Z'),
-            new Date('2026-06-29T18:00:00Z'), new Date('2026-06-29T21:00:00Z'),
-            new Date('2026-06-30T14:00:00Z'), new Date('2026-06-30T18:00:00Z'),
-            new Date('2026-06-30T21:00:00Z'), new Date('2026-07-01T14:00:00Z'),
-            new Date('2026-07-01T18:00:00Z'), new Date('2026-07-01T21:00:00Z'),
-            new Date('2026-07-02T14:00:00Z'), new Date('2026-07-02T18:00:00Z'),
-            new Date('2026-07-02T21:00:00Z'), new Date('2026-07-03T14:00:00Z'),
-        ];
+const ALL_MATCHES = [
+// ──────────────── GROUP A (México, Sudáfrica, Corea del Sur, Chequia) ────────────────
+// Matchday 1 — Jun 11
+{id:'A1',group:'A',num:1,md:1,stage:'group',tA:'México',tB:'Sudáfrica',date:et(19,0,'06-11'),venue:'Estadio Azteca',city:'Ciudad de México',sA:2,sB:0,done:true},
+{id:'A2',group:'A',num:2,md:1,stage:'group',tA:'Corea del Sur',tB:'Chequia',date:et(22,0,'06-11'),venue:'Estadio Akron',city:'Guadalajara',sA:2,sB:1,done:true},
+// Matchday 2 — Jun 18
+{id:'A3',group:'A',num:3,md:2,stage:'group',tA:'Chequia',tB:'Sudáfrica',date:et(15,0,'06-18'),venue:'Mercedes-Benz Stadium',city:'Atlanta',sA:1,sB:1,done:true},
+{id:'A4',group:'A',num:4,md:2,stage:'group',tA:'México',tB:'Corea del Sur',date:et(21,0,'06-18'),venue:'Estadio Akron',city:'Guadalajara',sA:1,sB:0,done:true},
+// Matchday 3 — Jun 24
+{id:'A5',group:'A',num:5,md:3,stage:'group',tA:'Chequia',tB:'México',date:et(21,0,'06-24'),venue:'Estadio Azteca',city:'Ciudad de México'},
+{id:'A6',group:'A',num:6,md:3,stage:'group',tA:'Sudáfrica',tB:'Corea del Sur',date:et(21,0,'06-24'),venue:'Estadio BBVA',city:'Monterrey'},
 
-        const hostKeyMap = {
-            A: 'us', B: 'mx', C: 'ca', D: 'us', E: 'us', F: 'us',
-            G: 'mx', H: 'us', I: 'us', J: 'us', K: 'ca', L: 'mx'
-        };
+// ──────────────── GROUP B (Canadá, Bosnia y Herzegovina, Catar, Suiza) ────────────────
+// Matchday 1
+{id:'B1',group:'B',num:7,md:1,stage:'group',tA:'Canadá',tB:'Bosnia y Herzegovina',date:et(19,0,'06-12'),venue:'BMO Field',city:'Toronto',sA:1,sB:1,done:true},
+{id:'B2',group:'B',num:8,md:1,stage:'group',tA:'Catar',tB:'Suiza',date:et(13,0,'06-13'),venue:"Levi's Stadium",city:'San Francisco',sA:1,sB:1,done:true},
+// Matchday 2 — Jun 18
+{id:'B3',group:'B',num:9,md:2,stage:'group',tA:'Suiza',tB:'Bosnia y Herzegovina',date:et(15,0,'06-18'),venue:'SoFi Stadium',city:'Los Ángeles',sA:4,sB:1,done:true},
+{id:'B4',group:'B',num:10,md:2,stage:'group',tA:'Canadá',tB:'Catar',date:et(18,0,'06-18'),venue:'BC Place',city:'Vancouver',sA:6,sB:0,done:true},
+// Matchday 3 — Jun 24
+{id:'B5',group:'B',num:11,md:3,stage:'group',tA:'Suiza',tB:'Canadá',date:et(15,0,'06-24'),venue:'BC Place',city:'Vancouver'},
+{id:'B6',group:'B',num:12,md:3,stage:'group',tA:'Bosnia y Herzegovina',tB:'Catar',date:et(15,0,'06-24'),venue:'Lumen Field',city:'Seattle'},
 
-        const groupLetters = Object.keys(GROUPS);
-        for (let gi = 0; gi < groupLetters.length; gi++) {
-            const groupId = groupLetters[gi];
-            const teams = GROUPS[groupId];
-            const [t1, t2, t3, t4] = teams;
-            const baseIdx = gi * 2;
-            const hostKey = hostKeyMap[groupId];
+// ──────────────── GROUP C (Brasil, Marruecos, Haití, Escocia) ────────────────
+// Matchday 1
+{id:'C1',group:'C',num:13,md:1,stage:'group',tA:'Brasil',tB:'Marruecos',date:et(16,0,'06-13'),venue:'MetLife Stadium',city:'Nueva York/NJ',sA:1,sB:1,done:true},
+{id:'C2',group:'C',num:14,md:1,stage:'group',tA:'Haití',tB:'Escocia',date:et(19,0,'06-13'),venue:'Gillette Stadium',city:'Boston',sA:0,sB:1,done:true},
+// Matchday 2 — Jun 19
+{id:'C3',group:'C',num:15,md:2,stage:'group',tA:'Escocia',tB:'Marruecos',date:et(15,0,'06-19'),venue:'Gillette Stadium',city:'Boston',sA:0,sB:1,done:true},
+{id:'C4',group:'C',num:16,md:2,stage:'group',tA:'Brasil',tB:'Haití',date:et(18,0,'06-19'),venue:'Lincoln Financial Field',city:'Filadelfia',sA:3,sB:0,done:true},
+// Matchday 3 — Jun 24
+{id:'C5',group:'C',num:17,md:3,stage:'group',tA:'Escocia',tB:'Brasil',date:et(18,0,'06-24'),venue:'Hard Rock Stadium',city:'Miami'},
+{id:'C6',group:'C',num:18,md:3,stage:'group',tA:'Marruecos',tB:'Haití',date:et(18,0,'06-24'),venue:'Mercedes-Benz Stadium',city:'Atlanta'},
 
-            // Matchday 1: t1 vs t2, t3 vs t4
-            matches.push({
-                id: `${groupId}1`, group: groupId, matchNumber: matchNum++, matchday: 1, stage: 'group',
-                teamA: t1, teamB: t2,
-                date: matchday1Starts[baseIdx].toISOString(),
-                venue: getVenue(hostKey)
-            });
-            matches.push({
-                id: `${groupId}2`, group: groupId, matchNumber: matchNum++, matchday: 1, stage: 'group',
-                teamA: t3, teamB: t4,
-                date: matchday1Starts[baseIdx + 1].toISOString(),
-                venue: getVenue(hostKey)
-            });
+// ──────────────── GROUP D (Estados Unidos, Paraguay, Australia, Turquía) ────────────────
+// Matchday 1
+{id:'D1',group:'D',num:19,md:1,stage:'group',tA:'Estados Unidos',tB:'Paraguay',date:et(22,0,'06-12'),venue:'SoFi Stadium',city:'Los Ángeles',sA:4,sB:1,done:true},
+{id:'D2',group:'D',num:20,md:1,stage:'group',tA:'Australia',tB:'Turquía',date:et(22,0,'06-13'),venue:'BC Place',city:'Vancouver',sA:2,sB:0,done:true},
+// Matchday 2 — Jun 19
+{id:'D3',group:'D',num:21,md:2,stage:'group',tA:'Estados Unidos',tB:'Australia',date:et(15,0,'06-19'),venue:'Lumen Field',city:'Seattle',sA:2,sB:0,done:true},
+{id:'D4',group:'D',num:22,md:2,stage:'group',tA:'Turquía',tB:'Paraguay',date:et(21,0,'06-19'),venue:"Levi's Stadium",city:'San Francisco',sA:0,sB:1,done:true},
+// Matchday 3 — Jun 25
+{id:'D5',group:'D',num:23,md:3,stage:'group',tA:'Turquía',tB:'Estados Unidos',date:et(22,0,'06-25'),venue:'SoFi Stadium',city:'Los Ángeles'},
+{id:'D6',group:'D',num:24,md:3,stage:'group',tA:'Paraguay',tB:'Australia',date:et(22,0,'06-25'),venue:"Levi's Stadium",city:'San Francisco'},
 
-            // Matchday 2: t1 vs t3, t2 vs t4
-            matches.push({
-                id: `${groupId}3`, group: groupId, matchNumber: matchNum++, matchday: 2, stage: 'group',
-                teamA: t1, teamB: t3,
-                date: matchday2Starts[baseIdx].toISOString(),
-                venue: getVenue(hostKey)
-            });
-            matches.push({
-                id: `${groupId}4`, group: groupId, matchNumber: matchNum++, matchday: 2, stage: 'group',
-                teamA: t2, teamB: t4,
-                date: matchday2Starts[baseIdx + 1].toISOString(),
-                venue: getVenue(hostKey)
-            });
+// ──────────────── GROUP E (Alemania, Curazao, Costa de Marfil, Ecuador) ────────────────
+// Matchday 1
+{id:'E1',group:'E',num:25,md:1,stage:'group',tA:'Alemania',tB:'Curazao',date:et(13,0,'06-14'),venue:'NRG Stadium',city:'Houston',sA:7,sB:1,done:true},
+{id:'E2',group:'E',num:26,md:1,stage:'group',tA:'Costa de Marfil',tB:'Ecuador',date:et(16,0,'06-14'),venue:'Lincoln Financial Field',city:'Filadelfia',sA:1,sB:0,done:true},
+// Matchday 2 — Jun 20
+{id:'E3',group:'E',num:27,md:2,stage:'group',tA:'Alemania',tB:'Costa de Marfil',date:et(16,0,'06-20'),venue:'BMO Field',city:'Toronto'},
+{id:'E4',group:'E',num:28,md:2,stage:'group',tA:'Ecuador',tB:'Curazao',date:et(22,0,'06-20'),venue:'Arrowhead Stadium',city:'Kansas City'},
+// Matchday 3 — Jun 25
+{id:'E5',group:'E',num:29,md:3,stage:'group',tA:'Curazao',tB:'Costa de Marfil',date:et(16,0,'06-25'),venue:'Lincoln Financial Field',city:'Filadelfia'},
+{id:'E6',group:'E',num:30,md:3,stage:'group',tA:'Ecuador',tB:'Alemania',date:et(16,0,'06-25'),venue:'MetLife Stadium',city:'Nueva York/NJ'},
 
-            // Matchday 3: t1 vs t4, t2 vs t3 (simultaneous in real tournament)
-            matches.push({
-                id: `${groupId}5`, group: groupId, matchNumber: matchNum++, matchday: 3, stage: 'group',
-                teamA: t1, teamB: t4,
-                date: matchday3Starts[baseIdx].toISOString(),
-                venue: getVenue(hostKey)
-            });
-            matches.push({
-                id: `${groupId}6`, group: groupId, matchNumber: matchNum++, matchday: 3, stage: 'group',
-                teamA: t2, teamB: t3,
-                date: matchday3Starts[baseIdx + 1].toISOString(),
-                venue: getVenue(hostKey)
-            });
-        }
+// ──────────────── GROUP F (Países Bajos, Japón, Suecia, Túnez) ────────────────
+// Matchday 1
+{id:'F1',group:'F',num:31,md:1,stage:'group',tA:'Países Bajos',tB:'Japón',date:et(19,0,'06-14'),venue:'AT&T Stadium',city:'Dallas',sA:2,sB:2,done:true},
+{id:'F2',group:'F',num:32,md:1,stage:'group',tA:'Suecia',tB:'Túnez',date:et(22,0,'06-14'),venue:'Estadio BBVA',city:'Monterrey',sA:5,sB:1,done:true},
+// Matchday 2 — Jun 20
+{id:'F3',group:'F',num:33,md:2,stage:'group',tA:'Países Bajos',tB:'Suecia',date:et(13,0,'06-20'),venue:'NRG Stadium',city:'Houston'},
+{id:'F4',group:'F',num:34,md:2,stage:'group',tA:'Túnez',tB:'Japón',date:et(0,0,'06-21'),venue:'Estadio BBVA',city:'Monterrey'},
+// Matchday 3 — Jun 25
+{id:'F5',group:'F',num:35,md:3,stage:'group',tA:'Japón',tB:'Suecia',date:et(19,0,'06-25'),venue:'AT&T Stadium',city:'Dallas'},
+{id:'F6',group:'F',num:36,md:3,stage:'group',tA:'Túnez',tB:'Países Bajos',date:et(19,0,'06-25'),venue:'Arrowhead Stadium',city:'Kansas City'},
 
-        return matches;
+// ──────────────── GROUP G (Bélgica, Egipto, Irán, Nueva Zelanda) ────────────────
+// Matchday 1
+{id:'G1',group:'G',num:37,md:1,stage:'group',tA:'Bélgica',tB:'Egipto',date:et(16,0,'06-15'),venue:'Lumen Field',city:'Seattle',sA:1,sB:1,done:true},
+{id:'G2',group:'G',num:38,md:1,stage:'group',tA:'Irán',tB:'Nueva Zelanda',date:et(22,0,'06-15'),venue:'SoFi Stadium',city:'Los Ángeles',sA:2,sB:2,done:true},
+// Matchday 2 — Jun 21
+{id:'G3',group:'G',num:39,md:2,stage:'group',tA:'Bélgica',tB:'Irán',date:et(15,0,'06-21'),venue:'SoFi Stadium',city:'Los Ángeles'},
+{id:'G4',group:'G',num:40,md:2,stage:'group',tA:'Nueva Zelanda',tB:'Egipto',date:et(21,0,'06-21'),venue:'BC Place',city:'Vancouver'},
+// Matchday 3 — Jun 26
+{id:'G5',group:'G',num:41,md:3,stage:'group',tA:'Egipto',tB:'Irán',date:et(23,0,'06-26'),venue:'Lumen Field',city:'Seattle'},
+{id:'G6',group:'G',num:42,md:3,stage:'group',tA:'Nueva Zelanda',tB:'Bélgica',date:et(23,0,'06-26'),venue:'BC Place',city:'Vancouver'},
+
+// ──────────────── GROUP H (España, Cabo Verde, Arabia Saudita, Uruguay) ────────────────
+// Matchday 1
+{id:'H1',group:'H',num:43,md:1,stage:'group',tA:'España',tB:'Cabo Verde',date:et(13,0,'06-15'),venue:'Mercedes-Benz Stadium',city:'Atlanta',sA:0,sB:0,done:true},
+{id:'H2',group:'H',num:44,md:1,stage:'group',tA:'Arabia Saudita',tB:'Uruguay',date:et(19,0,'06-15'),venue:'Hard Rock Stadium',city:'Miami',sA:1,sB:1,done:true},
+// Matchday 2 — Jun 21
+{id:'H3',group:'H',num:45,md:2,stage:'group',tA:'España',tB:'Arabia Saudita',date:et(12,0,'06-21'),venue:'Mercedes-Benz Stadium',city:'Atlanta'},
+{id:'H4',group:'H',num:46,md:2,stage:'group',tA:'Uruguay',tB:'Cabo Verde',date:et(18,0,'06-21'),venue:'Hard Rock Stadium',city:'Miami'},
+// Matchday 3 — Jun 26
+{id:'H5',group:'H',num:47,md:3,stage:'group',tA:'Cabo Verde',tB:'Arabia Saudita',date:et(20,0,'06-26'),venue:'NRG Stadium',city:'Houston'},
+{id:'H6',group:'H',num:48,md:3,stage:'group',tA:'Uruguay',tB:'España',date:et(20,0,'06-26'),venue:'Estadio Akron',city:'Guadalajara'},
+
+// ──────────────── GROUP I (Francia, Senegal, Irak, Noruega) ────────────────
+// Matchday 1
+{id:'I1',group:'I',num:49,md:1,stage:'group',tA:'Francia',tB:'Senegal',date:et(13,0,'06-16'),venue:'MetLife Stadium',city:'Nueva York/NJ',sA:3,sB:1,done:true},
+{id:'I2',group:'I',num:50,md:1,stage:'group',tA:'Irak',tB:'Noruega',date:et(16,0,'06-16'),venue:'Gillette Stadium',city:'Boston',sA:1,sB:4,done:true},
+// Matchday 2 — Jun 22
+{id:'I3',group:'I',num:51,md:2,stage:'group',tA:'Francia',tB:'Irak',date:et(17,0,'06-22'),venue:'Lincoln Financial Field',city:'Filadelfia'},
+{id:'I4',group:'I',num:52,md:2,stage:'group',tA:'Noruega',tB:'Senegal',date:et(20,0,'06-22'),venue:'MetLife Stadium',city:'Nueva York/NJ'},
+// Matchday 3 — Jun 26
+{id:'I5',group:'I',num:53,md:3,stage:'group',tA:'Noruega',tB:'Francia',date:et(15,0,'06-26'),venue:'Gillette Stadium',city:'Boston'},
+{id:'I6',group:'I',num:54,md:3,stage:'group',tA:'Senegal',tB:'Irak',date:et(15,0,'06-26'),venue:'BMO Field',city:'Toronto'},
+
+// ──────────────── GROUP J (Argentina, Argelia, Austria, Jordania) ────────────────
+// Matchday 1
+{id:'J1',group:'J',num:55,md:1,stage:'group',tA:'Argentina',tB:'Argelia',date:et(19,0,'06-16'),venue:'Arrowhead Stadium',city:'Kansas City',sA:3,sB:0,done:true},
+{id:'J2',group:'J',num:56,md:1,stage:'group',tA:'Austria',tB:'Jordania',date:et(22,0,'06-16'),venue:"Levi's Stadium",city:'San Francisco',sA:3,sB:1,done:true},
+// Matchday 2 — Jun 22
+{id:'J3',group:'J',num:57,md:2,stage:'group',tA:'Argentina',tB:'Austria',date:et(13,0,'06-22'),venue:'AT&T Stadium',city:'Dallas'},
+{id:'J4',group:'J',num:58,md:2,stage:'group',tA:'Jordania',tB:'Argelia',date:et(23,0,'06-22'),venue:"Levi's Stadium",city:'San Francisco'},
+// Matchday 3 — Jun 27
+{id:'J5',group:'J',num:59,md:3,stage:'group',tA:'Argelia',tB:'Austria',date:et(22,0,'06-27'),venue:'Arrowhead Stadium',city:'Kansas City'},
+{id:'J6',group:'J',num:60,md:3,stage:'group',tA:'Jordania',tB:'Argentina',date:et(22,0,'06-27'),venue:'AT&T Stadium',city:'Dallas'},
+
+// ──────────────── GROUP K (Portugal, RD Congo, Uzbekistán, Colombia) ────────────────
+// Matchday 1
+{id:'K1',group:'K',num:61,md:1,stage:'group',tA:'Portugal',tB:'RD Congo',date:et(13,0,'06-17'),venue:'NRG Stadium',city:'Houston',sA:0,sB:0,done:true},
+{id:'K2',group:'K',num:62,md:1,stage:'group',tA:'Uzbekistán',tB:'Colombia',date:et(22,0,'06-17'),venue:'Estadio Azteca',city:'Ciudad de México',sA:1,sB:3,done:true},
+// Matchday 2 — Jun 23
+{id:'K3',group:'K',num:63,md:2,stage:'group',tA:'Portugal',tB:'Uzbekistán',date:et(13,0,'06-23'),venue:'NRG Stadium',city:'Houston'},
+{id:'K4',group:'K',num:64,md:2,stage:'group',tA:'Colombia',tB:'RD Congo',date:et(22,0,'06-23'),venue:'Estadio Akron',city:'Guadalajara'},
+// Matchday 3 — Jun 27
+{id:'K5',group:'K',num:65,md:3,stage:'group',tA:'Colombia',tB:'Portugal',date:et(19,30,'06-27'),venue:'Hard Rock Stadium',city:'Miami'},
+{id:'K6',group:'K',num:66,md:3,stage:'group',tA:'RD Congo',tB:'Uzbekistán',date:et(19,30,'06-27'),venue:'Mercedes-Benz Stadium',city:'Atlanta'},
+
+// ──────────────── GROUP L (Inglaterra, Croacia, Ghana, Panamá) ────────────────
+// Matchday 1
+{id:'L1',group:'L',num:67,md:1,stage:'group',tA:'Inglaterra',tB:'Croacia',date:et(16,0,'06-17'),venue:'AT&T Stadium',city:'Dallas',sA:4,sB:2,done:true},
+{id:'L2',group:'L',num:68,md:1,stage:'group',tA:'Ghana',tB:'Panamá',date:et(19,0,'06-17'),venue:'BMO Field',city:'Toronto',sA:1,sB:0,done:true},
+// Matchday 2 — Jun 23
+{id:'L3',group:'L',num:69,md:2,stage:'group',tA:'Inglaterra',tB:'Ghana',date:et(16,0,'06-23'),venue:'Gillette Stadium',city:'Boston'},
+{id:'L4',group:'L',num:70,md:2,stage:'group',tA:'Panamá',tB:'Croacia',date:et(19,0,'06-23'),venue:'BMO Field',city:'Toronto'},
+// Matchday 3 — Jun 27
+{id:'L5',group:'L',num:71,md:3,stage:'group',tA:'Panamá',tB:'Inglaterra',date:et(17,0,'06-27'),venue:'MetLife Stadium',city:'Nueva York/NJ'},
+{id:'L6',group:'L',num:72,md:3,stage:'group',tA:'Croacia',tB:'Ghana',date:et(17,0,'06-27'),venue:'Lincoln Financial Field',city:'Filadelfia'},
+
+// ════════════════════════════════════════════════════════════════════
+// ║  KNOCKOUT STAGES — Teams TBD until group stage completes        ║
+// ╚═══════════════════════════════════════════════════════════════════
+
+// ──────── Round of 32 (Dieciseisavos) ────────
+{id:'R32_1',group:null,num:73,md:null,stage:'Round of 32',tA:'2do A',tB:'2do B',date:et(19,0,'06-28'),venue:'SoFi Stadium',city:'Los Ángeles'},
+{id:'R32_2',group:null,num:74,md:null,stage:'Round of 32',tA:'1ro E',tB:'3ro A/B/C/D/F',date:et(13,0,'06-29'),venue:'Gillette Stadium',city:'Boston'},
+{id:'R32_3',group:null,num:75,md:null,stage:'Round of 32',tA:'1ro F',tB:'2do C',date:et(16,0,'06-29'),venue:'Estadio BBVA',city:'Monterrey'},
+{id:'R32_4',group:null,num:76,md:null,stage:'Round of 32',tA:'1ro C',tB:'2do F',date:et(22,0,'06-29'),venue:'NRG Stadium',city:'Houston'},
+{id:'R32_5',group:null,num:77,md:null,stage:'Round of 32',tA:'1ro I',tB:'3ro C/D/F/G/H',date:et(13,0,'06-30'),venue:'MetLife Stadium',city:'Nueva York/NJ'},
+{id:'R32_6',group:null,num:78,md:null,stage:'Round of 32',tA:'2do E',tB:'2do I',date:et(16,0,'06-30'),venue:'AT&T Stadium',city:'Dallas'},
+{id:'R32_7',group:null,num:79,md:null,stage:'Round of 32',tA:'México',tB:'3ro C/E/F/H/I',date:et(22,0,'06-30'),venue:'Estadio Azteca',city:'Ciudad de México'},
+{id:'R32_8',group:null,num:80,md:null,stage:'Round of 32',tA:'1ro L',tB:'3ro E/H/I/J/K',date:et(13,0,'07-01'),venue:'Mercedes-Benz Stadium',city:'Atlanta'},
+{id:'R32_9',group:null,num:81,md:null,stage:'Round of 32',tA:'1ro D',tB:'3ro B/E/F/I/J',date:et(16,0,'07-01'),venue:"Levi's Stadium",city:'San Francisco'},
+{id:'R32_10',group:null,num:82,md:null,stage:'Round of 32',tA:'1ro G',tB:'3ro A/E/H/I/J',date:et(22,0,'07-01'),venue:'Lumen Field',city:'Seattle'},
+{id:'R32_11',group:null,num:83,md:null,stage:'Round of 32',tA:'2do K',tB:'2do L',date:et(13,0,'07-02'),venue:'BMO Field',city:'Toronto'},
+{id:'R32_12',group:null,num:84,md:null,stage:'Round of 32',tA:'1ro H',tB:'2do J',date:et(16,0,'07-02'),venue:'SoFi Stadium',city:'Los Ángeles'},
+{id:'R32_13',group:null,num:85,md:null,stage:'Round of 32',tA:'1ro B',tB:'3ro E/F/G/I/J',date:et(22,0,'07-02'),venue:'BC Place',city:'Vancouver'},
+{id:'R32_14',group:null,num:86,md:null,stage:'Round of 32',tA:'1ro J',tB:'2do H',date:et(16,0,'07-03'),venue:'Hard Rock Stadium',city:'Miami'},
+{id:'R32_15',group:null,num:87,md:null,stage:'Round of 32',tA:'1ro K',tB:'3ro D/E/I/J/L',date:et(19,0,'07-03'),venue:'Arrowhead Stadium',city:'Kansas City'},
+{id:'R32_16',group:null,num:88,md:null,stage:'Round of 32',tA:'2do D',tB:'2do G',date:et(22,0,'07-03'),venue:'AT&T Stadium',city:'Dallas'},
+
+// ──────── Round of 16 (Octavos) ────────
+{id:'R16_1',group:null,num:89,md:null,stage:'Round of 16',tA:'Ganador M74',tB:'Ganador M77',date:et(13,0,'07-04'),venue:'Lincoln Financial Field',city:'Filadelfia'},
+{id:'R16_2',group:null,num:90,md:null,stage:'Round of 16',tA:'Ganador M73',tB:'Ganador M75',date:et(19,0,'07-04'),venue:'NRG Stadium',city:'Houston'},
+{id:'R16_3',group:null,num:91,md:null,stage:'Round of 16',tA:'Ganador M76',tB:'Ganador M78',date:et(13,0,'07-05'),venue:'MetLife Stadium',city:'Nueva York/NJ'},
+{id:'R16_4',group:null,num:92,md:null,stage:'Round of 16',tA:'Ganador M79',tB:'Ganador M80',date:et(19,0,'07-05'),venue:'Estadio Azteca',city:'Ciudad de México'},
+{id:'R16_5',group:null,num:93,md:null,stage:'Round of 16',tA:'Ganador M83',tB:'Ganador M84',date:et(16,0,'07-06'),venue:'AT&T Stadium',city:'Dallas'},
+{id:'R16_6',group:null,num:94,md:null,stage:'Round of 16',tA:'Ganador M81',tB:'Ganador M82',date:et(21,0,'07-06'),venue:'Lumen Field',city:'Seattle'},
+{id:'R16_7',group:null,num:95,md:null,stage:'Round of 16',tA:'Ganador M86',tB:'Ganador M88',date:et(16,0,'07-07'),venue:'Mercedes-Benz Stadium',city:'Atlanta'},
+{id:'R16_8',group:null,num:96,md:null,stage:'Round of 16',tA:'Ganador M85',tB:'Ganador M87',date:et(21,0,'07-07'),venue:'BC Place',city:'Vancouver'},
+
+// ──────── Quarterfinals ────────
+{id:'QF_1',group:null,num:97,md:null,stage:'Quarterfinals',tA:'Ganador M89',tB:'Ganador M90',date:et(19,0,'07-09'),venue:'Gillette Stadium',city:'Boston'},
+{id:'QF_2',group:null,num:98,md:null,stage:'Quarterfinals',tA:'Ganador M93',tB:'Ganador M94',date:et(19,0,'07-10'),venue:'SoFi Stadium',city:'Los Ángeles'},
+{id:'QF_3',group:null,num:99,md:null,stage:'Quarterfinals',tA:'Ganador M91',tB:'Ganador M92',date:et(16,0,'07-11'),venue:'Hard Rock Stadium',city:'Miami'},
+{id:'QF_4',group:null,num:100,md:null,stage:'Quarterfinals',tA:'Ganador M95',tB:'Ganador M96',date:et(19,0,'07-11'),venue:'Arrowhead Stadium',city:'Kansas City'},
+
+// ──────── Semifinals ────────
+{id:'SF_1',group:null,num:101,md:null,stage:'Semifinals',tA:'Ganador M97',tB:'Ganador M98',date:et(19,0,'07-14'),venue:'AT&T Stadium',city:'Dallas'},
+{id:'SF_2',group:null,num:102,md:null,stage:'Semifinals',tA:'Ganador M99',tB:'Ganador M100',date:et(19,0,'07-15'),venue:'Mercedes-Benz Stadium',city:'Atlanta'},
+
+// ──────── Third Place ────────
+{id:'TP',group:null,num:103,md:null,stage:'Third Place',tA:'Perdedor M101',tB:'Perdedor M102',date:et(17,0,'07-18'),venue:'Hard Rock Stadium',city:'Miami'},
+
+// ──────── FINAL ────────
+{id:'FINAL',group:null,num:104,md:null,stage:'Final',tA:'Ganador M101',tB:'Ganador M102',date:et(17,0,'07-19'),venue:'MetLife Stadium',city:'Nueva York/NJ'},
+];
+
+// Build lookup
+const MATCH_MAP = {};
+ALL_MATCHES.forEach(m => MATCH_MAP[m.id] = m);
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  APPLICATION STATE                                               ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const state = {
+    user: null,
+    activeTab: 'predictions',
+    userPredictions: {},
+    users: [],
+    isAdmin: false,
+    dbMatches: {},
+    expandedGroups: new Set(['A','B','C','D']),
+    loading: false,
+};
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  AUTHENTICATION                                                  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+auth.onAuthStateChanged(async user => {
+    if (user) { state.user = user; state.isAdmin = user.uid === ADMIN_UID; await onUserSignedIn(user); }
+    else { state.user = null; state.isAdmin = false; showLoginScreen(); }
+});
+
+async function signInWithGoogle() {
+    try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+    catch(e) { console.error(e); showToast('Sign-in failed','error'); }
+}
+
+async function handleSignOut() { if(confirm('Sign out?')) await auth.signOut(); }
+
+async function onUserSignedIn(user) {
+    showLoading('Setting up...');
+    const ref = db.collection('users').doc(user.uid);
+    const doc = await ref.get();
+    if (!doc.exists) {
+        await ref.set({ uid:user.uid, displayName:user.displayName, email:user.email,
+            photoURL:user.photoURL||'', totalScore:0, exactScores:0, outcomeScores:0,
+            createdAt:firebase.firestore.FieldValue.serverTimestamp() });
+    } else {
+        await ref.update({ displayName:user.displayName, photoURL:user.photoURL||'' });
     }
+    await initializeMatches();
+    await loadUserPredictions(user.uid);
+    setupRealtimeListeners(user.uid);
+    showAppShell();
+    hideLoading();
+    showToast(`Welcome, ${user.displayName.split(' ')[0]}!`,'success');
+}
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  KNOCKOUT STAGE TEMPLATES                                       ║
-    // ║  Teams are TBD until group stage completes. Admin updates them.  ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function generateKnockoutMatches() {
-        const m = [];
-        let num = 73;
-
-        // Round of 32 (16 matches) — June 28 – July 3
-        const r32Dates = [
-            '2026-06-28T18:00:00Z', '2026-06-28T21:00:00Z', '2026-06-29T18:00:00Z', '2026-06-29T21:00:00Z',
-            '2026-06-30T18:00:00Z', '2026-06-30T21:00:00Z', '2026-07-01T18:00:00Z', '2026-07-01T21:00:00Z',
-            '2026-07-02T18:00:00Z', '2026-07-02T21:00:00Z', '2026-07-03T18:00:00Z', '2026-07-03T21:00:00Z',
-            '2026-07-03T14:00:00Z', '2026-07-03T17:00:00Z', '2026-07-04T14:00:00Z', '2026-07-04T17:00:00Z',
-        ];
-        const r32Matchups = [
-            ['1st A', '2nd B'], ['1st C', '2nd D'], ['1st E', '2nd F'], ['1st G', '2nd H'],
-            ['1st B', '2nd A'], ['1st D', '2nd C'], ['1st F', '2nd E'], ['1st H', '2nd G'],
-            ['1st I', '2nd J'], ['1st K', '2nd L'], ['1st J', '2nd I'], ['1st L', '2nd K'],
-            ['Best 3rd A-D', 'Best 3rd E-H'], ['Best 3rd B-C/F-G', 'Best 3rd A/D/E/F'],
-            ['Best 3rd A/B/C', 'Best 3rd D/E/F'], ['Best 3rd G/H', 'Best 3rd I/J/K/L'],
-        ];
-        for (let i = 0; i < 16; i++) {
-            m.push({
-                id: `R32_${i+1}`, group: null, matchNumber: num++, matchday: null, stage: 'Round of 32',
-                teamA: r32Matchups[i][0], teamB: r32Matchups[i][1],
-                date: r32Dates[i], venue: VENUES[i % VENUES.length]
-            });
-        }
-
-        // Round of 16 (8 matches) — July 5–8
-        const r16Dates = [
-            '2026-07-05T18:00:00Z', '2026-07-05T21:00:00Z', '2026-07-06T18:00:00Z', '2026-07-06T21:00:00Z',
-            '2026-07-07T18:00:00Z', '2026-07-07T21:00:00Z', '2026-07-08T18:00:00Z', '2026-07-08T21:00:00Z',
-        ];
-        for (let i = 0; i < 8; i++) {
-            m.push({
-                id: `R16_${i+1}`, group: null, matchNumber: num++, matchday: null, stage: 'Round of 16',
-                teamA: 'TBD', teamB: 'TBD', date: r16Dates[i], venue: VENUES[(i+3) % VENUES.length]
-            });
-        }
-
-        // Quarterfinals (4 matches) — July 10–12
-        const qfDates = ['2026-07-10T18:00:00Z', '2026-07-10T21:00:00Z', '2026-07-11T21:00:00Z', '2026-07-12T18:00:00Z'];
-        for (let i = 0; i < 4; i++) {
-            m.push({
-                id: `QF_${i+1}`, group: null, matchNumber: num++, matchday: null, stage: 'Quarterfinals',
-                teamA: 'TBD', teamB: 'TBD', date: qfDates[i], venue: VENUES[(i+7) % VENUES.length]
-            });
-        }
-
-        // Semifinals (2 matches) — July 14–15
-        m.push({ id: 'SF_1', group: null, matchNumber: num++, matchday: null, stage: 'Semifinals', teamA: 'TBD', teamB: 'TBD', date: '2026-07-14T21:00:00Z', venue: VENUES[1] });
-        m.push({ id: 'SF_2', group: null, matchNumber: num++, matchday: null, stage: 'Semifinals', teamA: 'TBD', teamB: 'TBD', date: '2026-07-15T21:00:00Z', venue: VENUES[3] });
-
-        // Third-Place Match — July 18
-        m.push({ id: 'TP', group: null, matchNumber: num++, matchday: null, stage: 'Third Place', teamA: 'TBD', teamB: 'TBD', date: '2026-07-18T20:00:00Z', venue: VENUES[6] });
-
-        // Final — July 19
-        m.push({ id: 'FINAL', group: null, matchNumber: num++, matchday: null, stage: 'Final', teamA: 'TBD', teamB: 'TBD', date: '2026-07-19T20:00:00Z', venue: VENUES[1] });
-
-        return m;
-    }
-
-    // Combine all matches
-    const ALL_MATCHES = [...generateGroupMatches(), ...generateKnockoutMatches()];
-
-    // Build quick lookup maps
-    const MATCH_MAP = {};
-    ALL_MATCHES.forEach(m => { MATCH_MAP[m.id] = m; });
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  📱 APPLICATION STATE                                           ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    const state = {
-        user: null,          // Firebase Auth user object
-        activeTab: 'predictions',
-        userPredictions: {},  // { matchId: { predictedA, predictedB } }
-        users: [],           // All users for leaderboard
-        isAdmin: false,
-        dbMatches: {},       // Firestore match docs { matchId: { scoreA, scoreB, isCompleted } }
-        expandedGroups: new Set(['A']), // Which group sections are expanded
-        loading: false,
-    };
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🔐 AUTHENTICATION                                              ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            state.user = user;
-            state.isAdmin = (user.uid === ADMIN_UID);
-            await onUserSignedIn(user);
-        } else {
-            state.user = null;
-            state.isAdmin = false;
-            showLoginScreen();
-        }
-    });
-
-    async function signInWithGoogle() {
-        try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            await auth.signInWithPopup(provider);
-        } catch (error) {
-            console.error('Sign-in error:', error);
-            showToast('Sign-in failed. Please try again.', 'error');
-        }
-    }
-
-    async function handleSignOut() {
-        if (confirm('Are you sure you want to sign out?')) {
-            await auth.signOut();
-        }
-    }
-
-    async function onUserSignedIn(user) {
-        showLoading('Setting up your experience...');
-
-        // Create or update user profile in Firestore
-        const userRef = db.collection('users').doc(user.uid);
-        const userDoc = await userRef.get();
-        if (!userDoc.exists) {
-            await userRef.set({
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL || '',
-                totalScore: 0,
-                exactScores: 0,
-                outcomeScores: 0,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } else {
-            // Update display name/photo if changed
-            await userRef.update({
-                displayName: user.displayName,
-                photoURL: user.photoURL || '',
-            });
-        }
-
-        // Initialize match data in Firestore if needed
-        await initializeMatches();
-
-        // Load user predictions
-        await loadUserPredictions(user.uid);
-
-        // Set up real-time listeners
-        setupRealtimeListeners(user.uid);
-
-        // Show app shell
-        showAppShell();
-        hideLoading();
-        showToast(`Welcome, ${user.displayName.split(' ')[0]}!`, 'success');
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  📊 FIRESTORE: MATCH INITIALIZATION                             ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    async function initializeMatches() {
-        try {
-            const doc = await db.collection('matches').doc('A1').get();
-            if (!doc.exists) {
-                console.log('Initializing matches in Firestore...');
-                const batch = db.batch();
-                for (const match of ALL_MATCHES) {
-                    const kickoffDate = new Date(match.date);
-                    const lockDate = new Date(kickoffDate.getTime() - 5 * 60 * 1000);
-                    const docRef = db.collection('matches').doc(match.id);
-                    batch.set(docRef, {
-                        id: match.id,
-                        group: match.group || null,
-                        matchNumber: match.matchNumber,
-                        matchday: match.matchday || null,
-                        stage: match.stage,
-                        teamA: match.teamA,
-                        teamB: match.teamB,
-                        kickoffTimestamp: firebase.firestore.Timestamp.fromDate(kickoffDate),
-                        lockTimestamp: firebase.firestore.Timestamp.fromDate(lockDate),
-                        venue: match.venue.name,
-                        city: match.venue.city,
-                        country: match.venue.country,
-                        scoreA: null,
-                        scoreB: null,
-                        isCompleted: false,
-                    });
-                }
-                await batch.commit();
-                console.log(`✅ ${ALL_MATCHES.length} matches initialized!`);
-                showToast('Match database initialized!', 'success');
-            }
-        } catch (error) {
-            console.error('Match initialization error:', error);
-            // If it's a permission error, the user is not admin — matches may already exist
-        }
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  📊 FIRESTORE: REAL-TIME LISTENERS                              ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    let unsubMatches = null;
-    let unsubUsers = null;
-    let unsubPredictions = null;
-
-    function setupRealtimeListeners(uid) {
-        // Listen to match results
-        unsubMatches = db.collection('matches').onSnapshot(snapshot => {
-            const changes = {};
-            snapshot.docChanges().forEach(change => {
-                const data = change.doc.data();
-                changes[change.doc.id] = {
-                    scoreA: data.scoreA,
-                    scoreB: data.scoreB,
-                    isCompleted: data.isCompleted
-                };
-            });
-            // On initial load, populate all
-            if (snapshot.metadata.hasPendingWrites === false) {
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    state.dbMatches[doc.id] = {
-                        scoreA: data.scoreA,
-                        scoreB: data.scoreB,
-                        isCompleted: data.isCompleted
-                    };
-                });
-            } else {
-                Object.assign(state.dbMatches, changes);
-            }
-            if (state.activeTab === 'predictions') renderPredictions();
-            if (state.activeTab === 'admin') renderAdminPanel();
-        }, err => console.error('Matches listener error:', err));
-
-        // Listen to leaderboard users
-        unsubUsers = db.collection('users').orderBy('totalScore', 'desc').onSnapshot(snapshot => {
-            state.users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (state.activeTab === 'leaderboard') renderLeaderboard();
-            updateUserScoreDisplay();
-        }, err => console.error('Users listener error:', err));
-
-        // Listen to user's own predictions
-        unsubPredictions = db.collection('predictions').doc(uid).collection('matches')
-            .onSnapshot(snapshot => {
-                state.userPredictions = {};
-                snapshot.forEach(doc => {
-                    state.userPredictions[doc.id] = doc.data();
-                });
-                if (state.activeTab === 'predictions') renderPredictions();
-            }, err => console.error('Predictions listener error:', err));
-    }
-
-    function detachListeners() {
-        if (unsubMatches) unsubMatches();
-        if (unsubUsers) unsubUsers();
-        if (unsubPredictions) unsubPredictions();
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  📊 FIRESTORE: PREDICTIONS                                       ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    async function loadUserPredictions(uid) {
-        try {
-            const snapshot = await db.collection('predictions').doc(uid).collection('matches').get();
-            state.userPredictions = {};
-            snapshot.forEach(doc => {
-                state.userPredictions[doc.id] = doc.data();
-            });
-        } catch (error) {
-            console.error('Error loading predictions:', error);
-        }
-    }
-
-    async function savePrediction(matchId, predictedA, predictedB) {
-        if (!state.user) return;
-        const uid = state.user.uid;
-
-        // Validate
-        if (predictedA === '' || predictedB === '' || predictedA === null || predictedB === null) {
-            showToast('Please enter both scores', 'error');
-            return;
-        }
-        const scoreA = parseInt(predictedA);
-        const scoreB = parseInt(predictedB);
-        if (isNaN(scoreA) || isNaN(scoreB) || scoreA < 0 || scoreB < 0) {
-            showToast('Scores must be valid non-negative numbers', 'error');
-            return;
-        }
-
-        try {
-            await db.collection('predictions').doc(uid).collection('matches').doc(matchId).set({
-                matchId,
-                predictedA: scoreA,
-                predictedB: scoreB,
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            showToast('Prediction saved!', 'success');
-        } catch (error) {
-            console.error('Save prediction error:', error);
-            if (error.code === 'permission-denied') {
-                showToast('This match is locked. Predictions close 5 minutes before kickoff.', 'error');
-            } else {
-                showToast('Error saving prediction. Please try again.', 'error');
-            }
-        }
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🏆 SCORING SYSTEM                                               ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function calculateMatchScore(predictedA, predictedB, actualA, actualB) {
-        if (predictedA === actualA && predictedB === actualB) return { points: 5, type: 'exact' };
-        const predOutcome = predictedA > predictedB ? 'A' : predictedA < predictedB ? 'B' : 'D';
-        const actOutcome = actualA > actualB ? 'A' : actualA < actualB ? 'B' : 'D';
-        if (predOutcome === actOutcome) return { points: 3, type: 'outcome' };
-        return { points: 0, type: 'none' };
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🔧 ADMIN: SUBMIT RESULTS & RECALCULATE                         ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    async function submitResult(matchId, scoreA, scoreB) {
-        if (!state.isAdmin) { showToast('Admin access required', 'error'); return; }
-
-        const a = parseInt(scoreA), b = parseInt(scoreB);
-        if (isNaN(a) || isNaN(b) || a < 0 || b < 0) {
-            showToast('Enter valid scores', 'error'); return;
-        }
-
-        try {
-            await db.collection('matches').doc(matchId).update({
-                scoreA: a,
-                scoreB: b,
-                isCompleted: true
-            });
-            showToast(`Result saved for ${matchId}: ${a} - ${b}`, 'success');
-        } catch (error) {
-            console.error('Submit result error:', error);
-            showToast('Error submitting result', 'error');
-        }
-    }
-
-    async function recalculateAllScores() {
-        if (!state.isAdmin) return;
-        showLoading('Recalculating all scores...');
-
-        try {
-            // 1. Get all completed matches from Firestore
-            const matchSnapshot = await db.collection('matches').where('isCompleted', '==', true).get();
-            const results = {};
-            matchSnapshot.forEach(doc => {
-                results[doc.id] = { scoreA: doc.data().scoreA, scoreB: doc.data().scoreB };
-            });
-
-            if (Object.keys(results).length === 0) {
-                hideLoading();
-                showToast('No completed matches to score yet.', 'info');
-                return;
-            }
-
-            // 2. Get all users
-            const usersSnapshot = await db.collection('users').get();
-            const uids = usersSnapshot.docs.map(d => d.id);
-
-            // 3. For each user, get their predictions and calculate total
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  FIRESTORE: MATCH INITIALIZATION                                 ║
+// ╚══════════════════════════════════════════════════════════════════╝
+async function initializeMatches() {
+    try {
+        const sample = await db.collection('matches').doc('A1').get();
+        if (!sample.exists) {
+            console.log('Initializing all matches in Firestore...');
             const batch = db.batch();
-            for (const uid of uids) {
-                const predSnapshot = await db.collection('predictions').doc(uid).collection('matches').get();
-                let totalScore = 0;
-                let exactScores = 0;
-                let outcomeScores = 0;
-
-                predSnapshot.forEach(doc => {
-                    const pred = doc.data();
-                    if (results[pred.matchId]) {
-                        const res = results[pred.matchId];
-                        const score = calculateMatchScore(pred.predictedA, pred.predictedB, res.scoreA, res.scoreB);
-                        totalScore += score.points;
-                        if (score.type === 'exact') exactScores++;
-                        if (score.type === 'outcome') outcomeScores++;
-                    }
-                });
-
-                batch.update(db.collection('users').doc(uid), {
-                    totalScore,
-                    exactScores,
-                    outcomeScores,
+            for (const m of ALL_MATCHES) {
+                const kickoff = new Date(m.date);
+                const lock = new Date(kickoff.getTime() - 5*60*1000);
+                batch.set(db.collection('matches').doc(m.id), {
+                    id:m.id, group:m.group||null, matchNumber:m.num,
+                    matchday:m.md||null, stage:m.stage,
+                    teamA:m.tA, teamB:m.tB,
+                    kickoffTimestamp:firebase.firestore.Timestamp.fromDate(kickoff),
+                    lockTimestamp:firebase.firestore.Timestamp.fromDate(lock),
+                    venue:m.venue, city:m.city,
+                    scoreA: m.sA!==undefined?m.sA:null,
+                    scoreB: m.sB!==undefined?m.sB:null,
+                    isCompleted: !!m.done,
                 });
             }
             await batch.commit();
-
-            hideLoading();
-            showToast(`Scores recalculated for ${uids.length} users!`, 'success');
-        } catch (error) {
-            hideLoading();
-            console.error('Recalculate error:', error);
-            showToast('Error recalculating scores', 'error');
+            console.log(`✅ ${ALL_MATCHES.length} matches initialized with results!`);
+            showToast('Match database initialized!','success');
         }
+    } catch(e) {
+        console.error('Init error:', e);
     }
+}
 
-    async function clearResult(matchId) {
-        if (!state.isAdmin) return;
-        try {
-            await db.collection('matches').doc(matchId).update({
-                scoreA: null,
-                scoreB: null,
-                isCompleted: false
-            });
-            showToast(`Result cleared for ${matchId}`, 'success');
-        } catch (error) {
-            showToast('Error clearing result', 'error');
-        }
-    }
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  REAL-TIME LISTENERS                                             ║
+// ╚══════════════════════════════════════════════════════════════════╝
+let unsubM=null, unsubU=null, unsubP=null;
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🎨 UI: SCREEN MANAGEMENT                                        ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function showLoginScreen() {
-        detachListeners();
-        document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('app-shell').classList.add('hidden');
-    }
+function setupRealtimeListeners(uid) {
+    unsubM = db.collection('matches').onSnapshot(snap => {
+        state.dbMatches = {};
+        snap.forEach(d => {
+            const data = d.data();
+            state.dbMatches[d.id] = { scoreA:data.scoreA, scoreB:data.scoreB, isCompleted:data.isCompleted };
+        });
+        if(state.activeTab==='predictions') renderPredictions();
+        if(state.activeTab==='admin') renderAdminPanel();
+    }, e => console.error('Matches listener:',e));
 
-    function showAppShell() {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('app-shell').classList.remove('hidden');
-
-        // Update nav
-        document.getElementById('user-name').textContent = state.user.displayName;
+    unsubU = db.collection('users').orderBy('totalScore','desc').onSnapshot(snap => {
+        state.users = snap.docs.map(d => ({id:d.id,...d.data()}));
+        if(state.activeTab==='leaderboard') renderLeaderboard();
         updateUserScoreDisplay();
+    }, e => console.error('Users listener:',e));
 
-        // Show admin tab if admin
-        const adminTab = document.getElementById('tab-admin');
-        if (state.isAdmin) {
-            adminTab.classList.remove('hidden');
-        } else {
-            adminTab.classList.add('hidden');
-        }
+    unsubP = db.collection('predictions').doc(uid).collection('matches')
+        .onSnapshot(snap => {
+            state.userPredictions = {};
+            snap.forEach(d => state.userPredictions[d.id] = d.data());
+            if(state.activeTab==='predictions') renderPredictions();
+        }, e => console.error('Preds listener:',e));
+}
 
-        // Render active tab
-        switchTab('predictions');
-    }
+function detachListeners() { if(unsubM)unsubM(); if(unsubU)unsubU(); if(unsubP)unsubP(); }
 
-    function updateUserScoreDisplay() {
-        const scoreEl = document.getElementById('user-score');
-        if (!scoreEl || !state.user) return;
-        const me = state.users.find(u => u.id === state.user.uid);
-        if (me) {
-            scoreEl.textContent = `${me.totalScore || 0} pts`;
-        } else {
-            scoreEl.textContent = '0 pts';
-        }
-    }
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  PREDICTIONS CRUD                                                ║
+// ╚══════════════════════════════════════════════════════════════════╝
+async function loadUserPredictions(uid) {
+    try {
+        const snap = await db.collection('predictions').doc(uid).collection('matches').get();
+        state.userPredictions = {};
+        snap.forEach(d => state.userPredictions[d.id] = d.data());
+    } catch(e) { console.error(e); }
+}
 
-    function switchTab(tab) {
-        if (!state.user) return;
-        state.activeTab = tab;
-
-        // Update tab buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('tab-active', 'text-white', 'bg-white/10');
-            btn.classList.add('text-gray-400');
+async function savePrediction(matchId, pA, pB) {
+    if(!state.user) return;
+    if(pA===''||pB===''||pA===null||pB===null){ showToast('Enter both scores','error'); return; }
+    const a=parseInt(pA), b=parseInt(pB);
+    if(isNaN(a)||isNaN(b)||a<0||b<0){ showToast('Invalid scores','error'); return; }
+    try {
+        await db.collection('predictions').doc(state.user.uid).collection('matches').doc(matchId).set({
+            matchId, predictedA:a, predictedB:b, submittedAt:firebase.firestore.FieldValue.serverTimestamp()
         });
-        const activeBtn = document.getElementById(`tab-${tab}`);
-        if (activeBtn) {
-            activeBtn.classList.add('tab-active', 'text-white', 'bg-white/10');
-            activeBtn.classList.remove('text-gray-400');
-        }
-
-        // Show/hide views
-        document.getElementById('predictions-view').classList.toggle('hidden', tab !== 'predictions');
-        document.getElementById('leaderboard-view').classList.toggle('hidden', tab !== 'leaderboard');
-        document.getElementById('admin-view').classList.toggle('hidden', tab !== 'admin');
-
-        // Render content
-        if (tab === 'predictions') renderPredictions();
-        if (tab === 'leaderboard') renderLeaderboard();
-        if (tab === 'admin') renderAdminPanel();
+        showToast('Prediction saved!','success');
+    } catch(e) {
+        console.error(e);
+        if(e.code==='permission-denied') showToast('Match is locked!','error');
+        else showToast('Error saving','error');
     }
+}
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🎨 UI: PREDICTIONS VIEW                                         ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function renderPredictions() {
-        const container = document.getElementById('predictions-view');
-        const now = new Date();
-        let html = '';
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  SCORING SYSTEM                                                  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function calcScore(pA,pB,aA,aB) {
+    if(pA===aA&&pB===aB) return {points:5,type:'exact'};
+    const po=pA>pB?'A':pA<pB?'B':'D', ao=aA>aB?'A':aA<aB?'B':'D';
+    return po===ao?{points:3,type:'outcome'}:{points:0,type:'none'};
+}
 
-        // Stats summary bar
-        const myUser = state.users.find(u => u.id === state.user.uid);
-        const totalPreds = Object.keys(state.userPredictions).length;
-        const totalMatches = ALL_MATCHES.length;
-        const totalCompleted = Object.values(state.dbMatches).filter(m => m.isCompleted).length;
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  ADMIN: SUBMIT RESULTS / RECALCULATE / EDIT USER SCORES         ║
+// ╚══════════════════════════════════════════════════════════════════╝
+async function submitResult(matchId, scoreA, scoreB) {
+    if(!state.isAdmin){showToast('Admin only','error');return;}
+    const a=parseInt(scoreA),b=parseInt(scoreB);
+    if(isNaN(a)||isNaN(b)||a<0||b<0){showToast('Invalid','error');return;}
+    try {
+        await db.collection('matches').doc(matchId).update({scoreA:a,scoreB:b,isCompleted:true});
+        showToast(`Result: ${a}-${b}`,'success');
+    } catch(e){ console.error(e); showToast('Error','error'); }
+}
 
-        html += `
-        <div class="mb-6 animate-fade-in">
-            <h2 class="text-2xl font-bold mb-4">My Predictions</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="glass-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-wc-gold">${totalPreds}</p>
-                    <p class="text-xs text-gray-400 mt-1">Predictions Made</p>
-                </div>
-                <div class="glass-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-blue-400">${totalMatches - totalPreds}</p>
-                    <p class="text-xs text-gray-400 mt-1">Remaining</p>
-                </div>
-                <div class="glass-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-emerald-400">${totalCompleted}</p>
-                    <p class="text-xs text-gray-400 mt-1">Matches Played</p>
-                </div>
-                <div class="glass-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-white">${myUser ? myUser.totalScore || 0 : 0}</p>
-                    <p class="text-xs text-gray-400 mt-1">My Score</p>
-                </div>
-            </div>
-        </div>`;
+async function clearResult(matchId) {
+    if(!state.isAdmin) return;
+    try {
+        await db.collection('matches').doc(matchId).update({scoreA:null,scoreB:null,isCompleted:false});
+        showToast('Result cleared','success');
+    } catch(e){ showToast('Error','error'); }
+}
 
-        // Group Stage
-        html += `<h3 class="text-lg font-bold text-gray-300 mb-3 mt-8"><i class="fas fa-layer-group text-wc-gold mr-2"></i>Group Stage</h3>`;
-
-        for (const [groupId, teams] of Object.entries(GROUPS)) {
-            const groupMatches = ALL_MATCHES.filter(m => m.group === groupId);
-            const isExpanded = state.expandedGroups.has(groupId);
-            const groupCompleted = groupMatches.every(m => state.dbMatches[m.id]?.isCompleted);
-
-            html += `
-            <div class="mb-3 glass-card rounded-xl overflow-hidden">
-                <button onclick="toggleGroup('${groupId}')"
-                    class="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-bold text-wc-gold bg-wc-gold/10 px-2 py-0.5 rounded">${groupId}</span>
-                        <div class="flex -space-x-1">
-                            ${teams.map(t => `<img src="${getFlagUrl(t)}" class="w-5 h-4 rounded-sm border border-gray-600" alt="${t}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2216%22><rect fill=%22%23334155%22 width=%2220%22 height=%2216%22/></svg>'">`).join('')}
-                        </div>
-                        <span class="text-sm text-gray-400 hidden sm:inline">${teams.join(' · ')}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        ${groupCompleted ? '<span class="text-xs text-emerald-400 font-medium"><i class="fas fa-check-circle mr-1"></i>Complete</span>' : ''}
-                        <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'} text-gray-500 text-xs transition-transform"></i>
-                    </div>
-                </button>
-                <div class="group-content ${isExpanded ? 'expanded' : ''}">
-                    <div class="px-4 pb-4 space-y-2">`;
-
-            for (const match of groupMatches) {
-                html += renderMatchCard(match, now);
-            }
-
-            // Group standings (if any results)
-            const groupResults = groupMatches.map(m => ({
-                ...m,
-                result: state.dbMatches[m.id] || { scoreA: null, scoreB: null }
-            })).filter(m => m.result.isCompleted);
-
-            if (groupResults.length > 0) {
-                html += renderGroupStandings(groupId, teams, groupMatches);
-            }
-
-            html += `</div></div></div>`;
+async function recalculateAllScores() {
+    if(!state.isAdmin) return;
+    showLoading('Recalculating...');
+    try {
+        const mSnap = await db.collection('matches').where('isCompleted','==',true).get();
+        const results = {};
+        mSnap.forEach(d => { const data=d.data(); results[d.id]={scoreA:data.scoreA,scoreB:data.scoreB}; });
+        if(!Object.keys(results).length){hideLoading();showToast('No completed matches','info');return;}
+        const uSnap = await db.collection('users').get();
+        const batch = db.batch();
+        for(const uDoc of uSnap.docs) {
+            const uid=uDoc.id;
+            const pSnap = await db.collection('predictions').doc(uid).collection('matches').get();
+            let total=0,exact=0,outcome=0;
+            pSnap.forEach(d => {
+                const p=d.data();
+                if(results[p.matchId]){
+                    const r=results[p.matchId];
+                    const s=calcScore(p.predictedA,p.predictedB,r.scoreA,r.scoreB);
+                    total+=s.points; if(s.type==='exact')exact++; if(s.type==='outcome')outcome++;
+                }
+            });
+            batch.update(db.collection('users').doc(uid),{totalScore:total,exactScores:exact,outcomeScores:outcome});
         }
+        await batch.commit();
+        hideLoading();
+        showToast(`Recalculated ${uSnap.docs.length} users!`,'success');
+    } catch(e){ hideLoading(); console.error(e); showToast('Error','error'); }
+}
 
-        // Knockout Stages
-        html += `<h3 class="text-lg font-bold text-gray-300 mb-3 mt-8"><i class="fas fa-trophy text-wc-gold mr-2"></i>Knockout Stage</h3>`;
+// ══ ADMIN: EDIT USER SCORES MANUALLY ══
+async function saveUserScores(uid) {
+    if(!state.isAdmin) return;
+    const total = parseInt(document.getElementById(`score-total-${uid}`).value)||0;
+    const exact = parseInt(document.getElementById(`score-exact-${uid}`).value)||0;
+    const outcome = parseInt(document.getElementById(`score-outcome-${uid}`).value)||0;
+    try {
+        await db.collection('users').doc(uid).update({totalScore:total,exactScores:exact,outcomeScores:outcome});
+        showToast('User scores updated!','success');
+    } catch(e){ console.error(e); showToast('Error','error'); }
+}
 
-        const knockoutStages = ['Round of 32', 'Round of 16', 'Quarterfinals', 'Semifinals', 'Third Place', 'Final'];
-        for (const stage of knockoutStages) {
-            const stageMatches = ALL_MATCHES.filter(m => m.stage === stage);
-            if (stageMatches.length === 0) continue;
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  UI: SCREEN MANAGEMENT                                           ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function showLoginScreen(){detachListeners();document.getElementById('login-screen').classList.remove('hidden');document.getElementById('app-shell').classList.add('hidden');}
 
-            html += `
-            <div class="mb-4 glass-card rounded-xl overflow-hidden">
-                <div class="px-4 py-3 border-b border-wc-border/50">
-                    <h4 class="text-sm font-bold text-gray-300">${stage}</h4>
-                </div>
-                <div class="px-4 py-3 space-y-2">`;
+function showAppShell(){
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app-shell').classList.remove('hidden');
+    document.getElementById('user-name').textContent=state.user.displayName;
+    updateUserScoreDisplay();
+    const at=document.getElementById('tab-admin');
+    state.isAdmin?at.classList.remove('hidden'):at.classList.add('hidden');
+    switchTab('predictions');
+}
 
-            for (const match of stageMatches) {
-                html += renderMatchCard(match, now);
-            }
+function updateUserScoreDisplay(){
+    const el=document.getElementById('user-score');if(!el||!state.user)return;
+    const me=state.users.find(u=>u.id===state.user.uid);
+    el.textContent=`${me?me.totalScore||0:0} pts`;
+}
 
-            html += `</div></div>`;
-        }
+function switchTab(tab){
+    if(!state.user)return; state.activeTab=tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('tab-active','text-white','bg-white/10');b.classList.add('text-gray-400');});
+    const ab=document.getElementById(`tab-${tab}`);
+    if(ab){ab.classList.add('tab-active','text-white','bg-white/10');ab.classList.remove('text-gray-400');}
+    ['predictions','leaderboard','admin'].forEach(t=>document.getElementById(`${t}-view`).classList.toggle('hidden',t!==tab));
+    if(tab==='predictions')renderPredictions();
+    if(tab==='leaderboard')renderLeaderboard();
+    if(tab==='admin')renderAdminPanel();
+}
 
-        container.innerHTML = html;
-    }
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  UI: PREDICTIONS VIEW                                            ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function renderPredictions(){
+    const c=document.getElementById('predictions-view');
+    const now=new Date();
+    let h='';
 
-    function renderMatchCard(match, now) {
-        const matchDate = new Date(match.date);
-        const lockDate = new Date(matchDate.getTime() - 5 * 60 * 1000);
-        const isLocked = now >= lockDate;
-        const dbMatch = state.dbMatches[match.id] || {};
-        const isCompleted = dbMatch.isCompleted;
-        const prediction = state.userPredictions[match.id];
-        const hasPrediction = prediction && (prediction.predictedA !== undefined && prediction.predictedB !== undefined);
-        const kickoffStr = formatDateShort(matchDate);
-        const timeStr = formatTime(matchDate);
-        const isPast = now >= matchDate;
+    // Stats
+    const me=state.users.find(u=>u.id===state.user.uid);
+    const tp=Object.keys(state.userPredictions).length;
+    const tc=ALL_MATCHES.length;
+    const done=Object.values(state.dbMatches).filter(m=>m.isCompleted).length;
 
-        let scoreDisplay = '';
-        let pointsBadge = '';
+    h+=`<div class="mb-6 animate-fade-in">
+        <h2 class="text-2xl font-bold mb-4">My Predictions</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="glass-card rounded-xl p-4 text-center"><p class="text-2xl font-bold text-wc-gold">${tp}</p><p class="text-xs text-gray-400 mt-1">Predictions Made</p></div>
+            <div class="glass-card rounded-xl p-4 text-center"><p class="text-2xl font-bold text-blue-400">${tc-tp}</p><p class="text-xs text-gray-400 mt-1">Remaining</p></div>
+            <div class="glass-card rounded-xl p-4 text-center"><p class="text-2xl font-bold text-emerald-400">${done}</p><p class="text-xs text-gray-400 mt-1">Matches Played</p></div>
+            <div class="glass-card rounded-xl p-4 text-center"><p class="text-2xl font-bold text-white">${me?me.totalScore||0:0}</p><p class="text-xs text-gray-400 mt-1">My Score</p></div>
+        </div></div>`;
 
-        if (isCompleted && dbMatch.scoreA !== null) {
-            scoreDisplay = `
+    // Group Stage
+    h+=`<h3 class="text-lg font-bold text-gray-300 mb-3 mt-8"><i class="fas fa-layer-group text-wc-gold mr-2"></i>Group Stage</h3>`;
+    for(const[gid,teams]of Object.entries(GROUPS)){
+        const gm=ALL_MATCHES.filter(m=>m.group===gid);
+        const exp=state.expandedGroups.has(gid);
+        const gDone=gm.every(m=>state.dbMatches[m.id]?.isCompleted);
+        h+=`<div class="mb-3 glass-card rounded-xl overflow-hidden">
+            <button onclick="toggleGroup('${gid}')" class="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-3">
-                    <span class="text-2xl font-black text-white">${dbMatch.scoreA}</span>
-                    <span class="text-gray-500 font-light">-</span>
-                    <span class="text-2xl font-black text-white">${dbMatch.scoreB}</span>
-                </div>`;
-
-            if (hasPrediction) {
-                const result = calculateMatchScore(prediction.predictedA, prediction.predictedB, dbMatch.scoreA, dbMatch.scoreB);
-                if (result.points > 0) {
-                    const badgeClass = result.type === 'exact' ? 'bg-wc-gold/20 text-wc-gold' : 'bg-emerald-500/20 text-emerald-400';
-                    pointsBadge = `<span class="text-xs font-bold px-2 py-0.5 rounded-full ${badgeClass}">+${result.points} ${result.type === 'exact' ? 'EXACT' : 'OUTCOME'}</span>`;
-                }
-            }
-        }
-
-        const teamAIsTBD = match.teamA.startsWith('TBD') || match.teamA.startsWith('1st') || match.teamA.startsWith('2nd') || match.teamA.startsWith('Best');
-        const teamBIsTBD = match.teamB.startsWith('TBD') || match.teamB.startsWith('1st') || match.teamB.startsWith('2nd') || match.teamB.startsWith('Best') || match.teamB.startsWith('Winner');
-
-        return `
-        <div class="match-card relative bg-gray-800/40 rounded-lg p-3 sm:p-4 ${isLocked ? 'match-locked' : ''} border ${isCompleted ? 'border-emerald-500/30' : isLocked ? 'border-gray-700/50' : 'border-transparent'}">
-            ${isLocked && !isCompleted && !hasPrediction ? `
-                <div class="lock-overlay rounded-lg">
-                    <span class="text-gray-400 text-sm font-medium bg-gray-900/80 px-3 py-1 rounded-full">
-                        <i class="fas fa-lock mr-1.5"></i>Locked
-                    </span>
-                </div>` : ''}
-
-            <!-- Date & Venue -->
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-gray-500">
-                    <i class="fas fa-calendar mr-1"></i>${kickoffStr} &middot; ${timeStr}
-                </span>
-                <span class="text-xs text-gray-600 hidden sm:inline">
-                    <i class="fas fa-location-dot mr-1"></i>${match.venue.name}
-                </span>
-            </div>
-
-            <!-- Teams & Scores -->
-            <div class="flex items-center justify-between gap-2">
-                <!-- Team A -->
-                <div class="flex-1 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                        <span class="text-sm font-semibold ${isCompleted ? 'text-white' : 'text-gray-300'}">${match.teamA}</span>
-                        <img src="${getFlagUrl(match.teamA)}" class="flag-img" alt="${match.teamA}" onerror="this.style.display='none'">
-                    </div>
+                    <span class="text-sm font-bold text-wc-gold bg-wc-gold/10 px-2 py-0.5 rounded">${gid}</span>
+                    <div class="flex -space-x-1">${teams.map(t=>`<img src="${flagUrl(t)}" class="w-5 h-4 rounded-sm border border-gray-600" alt="${t}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2216%22><rect fill=%22%23334155%22 width=%2220%22 height=%2216%22/></svg>'">`).join('')}</div>
+                    <span class="text-sm text-gray-400 hidden sm:inline">${teams.join(' · ')}</span>
                 </div>
-
-                ${isCompleted ? `
-                    <!-- Result -->
-                    <div class="flex flex-col items-center px-2">
-                        ${scoreDisplay}
-                        ${pointsBadge}
-                    </div>
-                ` : `
-                    <!-- Prediction Inputs -->
-                    <div class="flex items-center gap-1.5 px-1">
-                        <input type="number" min="0" max="99"
-                            id="pred-${match.id}-A"
-                            class="score-input ${isLocked ? 'pointer-events-none' : ''}"
-                            value="${hasPrediction ? prediction.predictedA : ''}"
-                            placeholder="-"
-                            ${isLocked || isCompleted || teamAIsTBD || teamBIsTBD ? 'disabled' : ''}
-                            onkeydown="if(event.key==='Enter')savePredFromInputs('${match.id}')">
-                        <span class="text-gray-500 font-light text-lg">-</span>
-                        <input type="number" min="0" max="99"
-                            id="pred-${match.id}-B"
-                            class="score-input ${isLocked ? 'pointer-events-none' : ''}"
-                            value="${hasPrediction ? prediction.predictedB : ''}"
-                            placeholder="-"
-                            ${isLocked || isCompleted || teamAIsTBD || teamBIsTBD ? 'disabled' : ''}
-                            onkeydown="if(event.key==='Enter')savePredFromInputs('${match.id}')">
-                    </div>
-                `}
-
-                <!-- Team B -->
-                <div class="flex-1 text-left">
-                    <div class="flex items-center gap-2">
-                        <img src="${getFlagUrl(match.teamB)}" class="flag-img" alt="${match.teamB}" onerror="this.style.display='none'">
-                        <span class="text-sm font-semibold ${isCompleted ? 'text-white' : 'text-gray-300'}">${match.teamB}</span>
-                    </div>
+                <div class="flex items-center gap-2">
+                    ${gDone?'<span class="text-xs text-emerald-400 font-medium"><i class="fas fa-check-circle mr-1"></i>Complete</span>':''}
+                    <i class="fas fa-chevron-${exp?'up':'down'} text-gray-500 text-xs"></i>
                 </div>
-            </div>
-
-            ${!isCompleted && !isLocked && !teamAIsTBD && !teamBIsTBD ? `
-                <!-- Save Button -->
-                <div class="flex justify-center mt-3">
-                    <button onclick="savePredFromInputs('${match.id}')"
-                        class="text-xs font-semibold px-4 py-1.5 rounded-lg bg-wc-gold/10 text-wc-gold hover:bg-wc-gold/20 transition-colors">
-                        <i class="fas fa-check mr-1"></i>Save
-                    </button>
-                </div>` : ''}
-
-            ${hasPrediction && !isCompleted ? `
-                <div class="text-center mt-2">
-                    <span class="text-xs text-gray-500"><i class="fas fa-pen mr-1"></i>Your prediction: ${prediction.predictedA} - ${prediction.predictedB}</span>
-                </div>` : ''}
-        </div>`;
+            </button>
+            <div class="group-content ${exp?'expanded':''}"><div class="px-4 pb-4 space-y-2">`;
+        for(const m of gm) h+=renderMatchCard(m,now);
+        const gRes=gm.filter(m=>state.dbMatches[m.id]?.isCompleted);
+        if(gRes.length) h+=renderStandings(gid,teams,gm);
+        h+=`</div></div></div>`;
     }
 
-    function renderGroupStandings(groupId, teams, matches) {
-        const standings = teams.map(team => {
-            let played = 0, won = 0, drawn = 0, lost = 0, gf = 0, ga = 0, pts = 0;
-            matches.forEach(m => {
-                const dbM = state.dbMatches[m.id];
-                if (!dbM || !dbM.isCompleted) return;
-                let isA = (m.teamA === team);
-                let isB = (m.teamB === team);
-                if (!isA && !isB) return;
-                played++;
-                const goalsFor = isA ? dbM.scoreA : dbM.scoreB;
-                const goalsAgainst = isA ? dbM.scoreB : dbM.scoreA;
-                gf += goalsFor;
-                ga += goalsAgainst;
-                if (goalsFor > goalsAgainst) { won++; pts += 3; }
-                else if (goalsFor === goalsAgainst) { drawn++; pts += 1; }
-                else { lost++; }
-            });
-            return { team, played, won, drawn, lost, gf, ga, gd: gf - ga, pts };
+    // Knockout
+    h+=`<h3 class="text-lg font-bold text-gray-300 mb-3 mt-8"><i class="fas fa-trophy text-wc-gold mr-2"></i>Knockout Stage</h3>`;
+    const stages=['Round of 32','Round of 16','Quarterfinals','Semifinals','Third Place','Final'];
+    for(const st of stages){
+        const sm=ALL_MATCHES.filter(m=>m.stage===st);
+        if(!sm.length) continue;
+        h+=`<div class="mb-4 glass-card rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-wc-border/50"><h4 class="text-sm font-bold text-gray-300">${st}</h4></div>
+            <div class="px-4 py-3 space-y-2">`;
+        for(const m of sm) h+=renderMatchCard(m,now);
+        h+=`</div></div>`;
+    }
+    c.innerHTML=h;
+}
+
+function renderMatchCard(m,now){
+    const md=new Date(m.date), lock=new Date(md.getTime()-5*60*1000);
+    const locked=now>=lock, dbM=state.dbMatches[m.id]||{}, done=dbM.isCompleted;
+    const pred=state.userPredictions[m.id], hasPred=pred&&pred.predictedA!==undefined;
+    const dStr=fmtDate(md), tStr=fmtTime(md);
+    const isTBD=m.tA.startsWith('TBD')||m.tA.startsWith('1ro')||m.tA.startsWith('2do')||m.tA.startsWith('3ro')||m.tA.startsWith('Ganador')||m.tA.startsWith('Perdedor')||m.tA==='México'&&m.stage!=='group';
+
+    let scoreHtml='', ptsBadge='';
+    if(done&&dbM.scoreA!==null){
+        scoreHtml=`<div class="flex items-center gap-3"><span class="text-2xl font-black text-white">${dbM.scoreA}</span><span class="text-gray-500">-</span><span class="text-2xl font-black text-white">${dbM.scoreB}</span></div>`;
+        if(hasPred){
+            const r=calcScore(pred.predictedA,pred.predictedB,dbM.scoreA,dbM.scoreB);
+            if(r.points) ptsBadge=`<span class="text-xs font-bold px-2 py-0.5 rounded-full ${r.type==='exact'?'bg-wc-gold/20 text-wc-gold':'bg-emerald-500/20 text-emerald-400'}">+${r.points} ${r.type==='exact'?'EXACT':'OUTCOME'}</span>`;
+        }
+    }
+
+    return `<div class="match-card relative bg-gray-800/40 rounded-lg p-3 sm:p-4 ${locked?'match-locked':''} border ${done?'border-emerald-500/30':locked?'border-gray-700/50':'border-transparent'}">
+        ${locked&&!done&&!hasPred?`<div class="lock-overlay rounded-lg"><span class="text-gray-400 text-sm font-medium bg-gray-900/80 px-3 py-1 rounded-full"><i class="fas fa-lock mr-1.5"></i>Locked</span></div>`:''}
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-500"><i class="fas fa-calendar mr-1"></i>${dStr} · ${tStr}</span>
+            <span class="text-xs text-gray-600 hidden sm:inline"><i class="fas fa-location-dot mr-1"></i>${m.venue}</span>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex-1 text-right"><div class="flex items-center justify-end gap-2">
+                <span class="text-sm font-semibold ${done?'text-white':'text-gray-300'}">${m.tA}</span>
+                <img src="${flagUrl(m.tA)}" class="flag-img" alt="${m.tA}" onerror="this.style.display='none'">
+            </div></div>
+            ${done?`<div class="flex flex-col items-center px-2">${scoreHtml}${ptsBadge}</div>`
+            :`<div class="flex items-center gap-1.5 px-1">
+                <input type="number" min="0" max="99" id="pred-${m.id}-A" class="score-input ${locked?'pointer-events-none':''}" value="${hasPred?pred.predictedA:''}" placeholder="-" ${locked||done||isTBD?'disabled':''} onkeydown="if(event.key==='Enter')savePred('${m.id}')">
+                <span class="text-gray-500 text-lg">-</span>
+                <input type="number" min="0" max="99" id="pred-${m.id}-B" class="score-input ${locked?'pointer-events-none':''}" value="${hasPred?pred.predictedB:''}" placeholder="-" ${locked||done||isTBD?'disabled':''} onkeydown="if(event.key==='Enter')savePred('${m.id}')">
+            </div>`}
+            <div class="flex-1 text-left"><div class="flex items-center gap-2">
+                <img src="${flagUrl(m.tB)}" class="flag-img" alt="${m.tB}" onerror="this.style.display='none'">
+                <span class="text-sm font-semibold ${done?'text-white':'text-gray-300'}">${m.tB}</span>
+            </div></div>
+        </div>
+        ${!done&&!locked&&!isTBD?`<div class="flex justify-center mt-3"><button onclick="savePred('${m.id}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg bg-wc-gold/10 text-wc-gold hover:bg-wc-gold/20 transition-colors"><i class="fas fa-check mr-1"></i>Save</button></div>`:''}
+        ${hasPred&&!done?`<div class="text-center mt-2"><span class="text-xs text-gray-500"><i class="fas fa-pen mr-1"></i>Your prediction: ${pred.predictedA} - ${pred.predictedB}</span></div>`:''}
+    </div>`;
+}
+
+function renderStandings(gid,teams,matches){
+    const st=teams.map(t=>{
+        let p=0,w=0,d=0,l=0,gf=0,ga=0,pts=0;
+        matches.forEach(m=>{
+            const dbM=state.dbMatches[m.id]; if(!dbM||!dbM.isCompleted)return;
+            const isA=m.tA===t,isB=m.tB===t; if(!isA&&!isB)return;
+            p++;
+            const f=isA?dbM.scoreA:dbM.scoreB, ag=isA?dbM.scoreB:dbM.scoreA;
+            gf+=f;ga+=ag;
+            if(f>ag){w++;pts+=3;}else if(f===ag){d++;pts+=1;}else{l++;}
         });
+        return{team:t,p,w,d,l,gf,ga,gd:gf-ga,pts};
+    });
+    st.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
+    let h=`<div class="mt-3 border-t border-wc-border/30 pt-3"><h5 class="text-xs font-semibold text-gray-500 uppercase mb-2">Standings</h5>
+        <div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr class="text-gray-500">
+        <th class="text-left py-1 pl-1">#</th><th class="text-left py-1">Team</th>
+        <th class="text-center py-1">P</th><th class="text-center py-1">W</th><th class="text-center py-1">D</th><th class="text-center py-1">L</th>
+        <th class="text-center py-1 hidden sm:table-cell">GD</th><th class="text-center py-1 pr-1">Pts</th>
+        </tr></thead><tbody>`;
+    st.forEach((s,i)=>{
+        const q=i<2;
+        h+=`<tr class="${q?'text-emerald-400':'text-gray-400'}">
+            <td class="py-1 pl-1 font-bold">${i+1}</td>
+            <td class="py-1"><div class="flex items-center gap-1.5"><img src="${flagUrl(s.team)}" class="w-4 h-3 rounded-sm" onerror="this.style.display='none'"><span class="font-medium">${s.team}</span></div></td>
+            <td class="text-center py-1">${s.p}</td><td class="text-center py-1">${s.w}</td><td class="text-center py-1">${s.d}</td><td class="text-center py-1">${s.l}</td>
+            <td class="text-center py-1 hidden sm:table-cell">${s.gd>0?'+':''}${s.gd}</td>
+            <td class="text-center py-1 pr-1 font-bold">${s.pts}</td></tr>`;
+    });
+    h+=`</tbody></table></div></div>`;
+    return h;
+}
 
-        standings.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+function savePred(id){const a=document.getElementById(`pred-${id}-A`),b=document.getElementById(`pred-${id}-B`);if(a&&b)savePrediction(id,a.value,b.value);}
+function toggleGroup(g){state.expandedGroups.has(g)?state.expandedGroups.delete(g):state.expandedGroups.add(g);renderPredictions();}
 
-        let html = `<div class="mt-3 border-t border-wc-border/30 pt-3">
-            <h5 class="text-xs font-semibold text-gray-500 uppercase mb-2">Standings</h5>
-            <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-                <thead>
-                    <tr class="text-gray-500">
-                        <th class="text-left py-1 pl-1">#</th>
-                        <th class="text-left py-1">Team</th>
-                        <th class="text-center py-1">P</th>
-                        <th class="text-center py-1">W</th>
-                        <th class="text-center py-1">D</th>
-                        <th class="text-center py-1">L</th>
-                        <th class="text-center py-1 hidden sm:table-cell">GD</th>
-                        <th class="text-center py-1 pr-1">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-        standings.forEach((s, i) => {
-            const isQualified = i < 2;
-            html += `
-                <tr class="${isQualified ? 'text-emerald-400' : 'text-gray-400'}">
-                    <td class="py-1 pl-1 font-bold">${i + 1}</td>
-                    <td class="py-1">
-                        <div class="flex items-center gap-1.5">
-                            <img src="${getFlagUrl(s.team)}" class="w-4 h-3 rounded-sm" onerror="this.style.display='none'">
-                            <span class="font-medium">${s.team}</span>
-                        </div>
-                    </td>
-                    <td class="text-center py-1">${s.played}</td>
-                    <td class="text-center py-1">${s.won}</td>
-                    <td class="text-center py-1">${s.drawn}</td>
-                    <td class="text-center py-1">${s.lost}</td>
-                    <td class="text-center py-1 hidden sm:table-cell">${s.gd > 0 ? '+' : ''}${s.gd}</td>
-                    <td class="text-center py-1 pr-1 font-bold">${s.pts}</td>
-                </tr>`;
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  UI: LEADERBOARD                                                 ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function renderLeaderboard(){
+    const c=document.getElementById('leaderboard-view');
+    let h=`<div class="animate-fade-in"><h2 class="text-2xl font-bold mb-2">Leaderboard</h2>
+        <p class="text-sm text-gray-400 mb-6">Real-time rankings</p></div>`;
+
+    if(!state.users.length){
+        h+=`<div class="glass-card rounded-xl p-8 text-center"><i class="fas fa-users text-4xl text-gray-600 mb-4 block"></i>
+            <p class="text-gray-400">No participants yet.</p></div>`;
+    } else {
+        // Podium
+        const top=state.users.slice(0,3);
+        h+=`<div class="flex items-end justify-center gap-3 sm:gap-6 mb-8 px-4">`;
+        if(top.length>=2){
+            const u=top[1];
+            h+=`<div class="flex flex-col items-center order-1">
+                <img src="${u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=64748b&color=fff&size=64`}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-gray-400 mb-1" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=64748b&color=fff'">
+                <span class="text-xs font-semibold text-gray-300 max-w-[80px] truncate">${u.displayName}</span>
+                <div class="rank-2 w-20 sm:w-24 h-16 sm:h-20 mt-2 rounded-t-lg flex items-center justify-center"><span class="text-lg font-black text-white">${u.totalScore||0}</span></div></div>`;
+        }
+        if(top.length>=1){
+            const u=top[0];
+            h+=`<div class="flex flex-col items-center order-2">
+                <i class="fas fa-crown text-wc-gold text-lg mb-1"></i>
+                <img src="${u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=d97706&color=fff&size=64`}" class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-wc-gold mb-1" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=d97706&color=fff'">
+                <span class="text-sm font-bold text-white max-w-[100px] truncate">${u.displayName}</span>
+                <div class="rank-1 w-20 sm:w-24 h-24 sm:h-28 mt-2 rounded-t-lg flex flex-col items-center justify-center">
+                    <span class="text-2xl font-black text-white">${u.totalScore||0}</span><span class="text-[10px] text-amber-100 font-medium">POINTS</span></div></div>`;
+        }
+        if(top.length>=3){
+            const u=top[2];
+            h+=`<div class="flex flex-col items-center order-3">
+                <img src="${u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=92400e&color=fff&size=64`}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-amber-700 mb-1" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=92400e&color=fff'">
+                <span class="text-xs font-semibold text-gray-300 max-w-[80px] truncate">${u.displayName}</span>
+                <div class="rank-3 w-20 sm:w-24 h-12 sm:h-16 mt-2 rounded-t-lg flex items-center justify-center"><span class="text-lg font-black text-white">${u.totalScore||0}</span></div></div>`;
+        }
+        h+=`</div>`;
+
+        // Table
+        h+=`<div class="glass-card rounded-xl overflow-hidden"><div class="overflow-x-auto"><table class="leaderboard-table w-full">
+            <thead><tr class="border-b border-wc-border/50 text-gray-500 text-xs uppercase">
+            <th class="text-left px-4 py-3 w-12">#</th><th class="text-left px-4 py-3">Player</th>
+            <th class="text-center px-4 py-3">Exact (5)</th><th class="text-center px-4 py-3">Outcome (3)</th><th class="text-center px-4 py-3 w-24">Total</th>
+            </tr></thead><tbody>`;
+        state.users.forEach((u,i)=>{
+            const isMe=u.id===state.user.uid;
+            let rb=`<span class="text-gray-500">${i+1}</span>`;
+            if(i===0)rb='<span class="text-wc-gold font-bold"><i class="fas fa-crown mr-1"></i>1</span>';
+            else if(i===1)rb='<span class="text-gray-400 font-bold">2</span>';
+            else if(i===2)rb='<span class="text-amber-700 font-bold">3</span>';
+            h+=`<tr class="border-b border-wc-border/20 ${isMe?'bg-wc-gold/5':'hover:bg-white/5'} transition-colors">
+                <td class="px-4 py-3">${rb}</td>
+                <td class="px-4 py-3"><div class="flex items-center gap-3">
+                    <img src="${u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=475569&color=fff&size=40`}" class="w-8 h-8 rounded-full border border-gray-700" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=475569&color=fff'">
+                    <span class="text-sm font-semibold text-white">${u.displayName}</span>
+                    ${isMe?'<span class="ml-2 text-[10px] bg-wc-gold/20 text-wc-gold px-1.5 py-0.5 rounded font-bold">YOU</span>':''}
+                </div></td>
+                <td class="px-4 py-3 text-center"><span class="text-wc-gold font-bold">${u.exactScores||0}</span></td>
+                <td class="px-4 py-3 text-center"><span class="text-emerald-400 font-bold">${u.outcomeScores||0}</span></td>
+                <td class="px-4 py-3 text-center"><span class="text-lg font-black text-white">${u.totalScore||0}</span></td></tr>`;
         });
-        html += `</tbody></table></div></div>`;
-        return html;
+        h+=`</tbody></table></div></div>`;
     }
+    c.innerHTML=h;
+}
 
-    function savePredFromInputs(matchId) {
-        const inputA = document.getElementById(`pred-${matchId}-A`);
-        const inputB = document.getElementById(`pred-${matchId}-B`);
-        if (!inputA || !inputB) return;
-        savePrediction(matchId, inputA.value, inputB.value);
-    }
-
-    function toggleGroup(groupId) {
-        if (state.expandedGroups.has(groupId)) {
-            state.expandedGroups.delete(groupId);
-        } else {
-            state.expandedGroups.add(groupId);
-        }
-        renderPredictions();
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🎨 UI: LEADERBOARD VIEW                                        ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function renderLeaderboard() {
-        const container = document.getElementById('leaderboard-view');
-        let html = '';
-
-        html += `
-        <div class="animate-fade-in">
-            <h2 class="text-2xl font-bold mb-2">Leaderboard</h2>
-            <p class="text-sm text-gray-400 mb-6">Real-time rankings of all participants</p>
-        </div>`;
-
-        if (state.users.length === 0) {
-            html += `
-            <div class="glass-card rounded-xl p-8 text-center">
-                <i class="fas fa-users text-4xl text-gray-600 mb-4 block"></i>
-                <p class="text-gray-400">No participants yet. Be the first to make predictions!</p>
-            </div>`;
-        } else {
-            // Top 3 podium
-            const top3 = state.users.slice(0, 3);
-            if (top3.length >= 1) {
-                html += `<div class="flex items-end justify-center gap-3 sm:gap-6 mb-8 px-4">`;
-
-                // 2nd place (shown first on left)
-                if (top3.length >= 2) {
-                    const u = top3[1];
-                    html += `
-                    <div class="flex flex-col items-center order-1">
-                        <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=64748b&color=fff&size=64`}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-gray-400 mb-1" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=64748b&color=fff'">
-                        <span class="text-xs font-semibold text-gray-300 max-w-[80px] truncate">${u.displayName}</span>
-                        <div class="rank-2 w-20 sm:w-24 h-16 sm:h-20 mt-2 rounded-t-lg flex items-center justify-center">
-                            <span class="text-lg font-black text-white">${u.totalScore || 0}</span>
-                        </div>
-                    </div>`;
-                }
-
-                // 1st place (center, tallest)
-                const u1 = top3[0];
-                html += `
-                <div class="flex flex-col items-center order-2">
-                    <i class="fas fa-crown text-wc-gold text-lg mb-1"></i>
-                    <img src="${u1.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u1.displayName)}&background=d97706&color=fff&size=64`}" class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-wc-gold mb-1" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u1.displayName)}&background=d97706&color=fff'">
-                    <span class="text-sm font-bold text-white max-w-[100px] truncate">${u1.displayName}</span>
-                    <div class="rank-1 w-20 sm:w-24 h-24 sm:h-28 mt-2 rounded-t-lg flex flex-col items-center justify-center">
-                        <span class="text-2xl font-black text-white">${u1.totalScore || 0}</span>
-                        <span class="text-[10px] text-amber-100 font-medium">POINTS</span>
-                    </div>
-                </div>`;
-
-                // 3rd place (right)
-                if (top3.length >= 3) {
-                    const u3 = top3[2];
-                    html += `
-                    <div class="flex flex-col items-center order-3">
-                        <img src="${u3.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u3.displayName)}&background=92400e&color=fff&size=64`}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-amber-700 mb-1" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u3.displayName)}&background=92400e&color=fff'">
-                        <span class="text-xs font-semibold text-gray-300 max-w-[80px] truncate">${u3.displayName}</span>
-                        <div class="rank-3 w-20 sm:w-24 h-12 sm:h-16 mt-2 rounded-t-lg flex items-center justify-center">
-                            <span class="text-lg font-black text-white">${u3.totalScore || 0}</span>
-                        </div>
-                    </div>`;
-                }
-
-                html += `</div>`;
-            }
-
-            // Full rankings table
-            html += `
-            <div class="glass-card rounded-xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="leaderboard-table w-full">
-                        <thead>
-                            <tr class="border-b border-wc-border/50 text-gray-500 text-xs uppercase">
-                                <th class="text-left px-4 py-3 w-12">#</th>
-                                <th class="text-left px-4 py-3">Player</th>
-                                <th class="text-center px-4 py-3">Exact (5pts)</th>
-                                <th class="text-center px-4 py-3">Outcome (3pts)</th>
-                                <th class="text-center px-4 py-3 w-24">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-
-            state.users.forEach((user, index) => {
-                const isCurrentUser = user.id === state.user.uid;
-                const rank = index + 1;
-                let rankBadge = `<span class="text-gray-500 font-medium">${rank}</span>`;
-                if (rank === 1) rankBadge = '<span class="text-wc-gold font-bold"><i class="fas fa-crown mr-1"></i>1</span>';
-                else if (rank === 2) rankBadge = '<span class="text-gray-400 font-bold">2</span>';
-                else if (rank === 3) rankBadge = '<span class="text-amber-700 font-bold">3</span>';
-
-                html += `
-                    <tr class="border-b border-wc-border/20 ${isCurrentUser ? 'bg-wc-gold/5' : 'hover:bg-white/5'} transition-colors">
-                        <td class="px-4 py-3">${rankBadge}</td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="${user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=475569&color=fff&size=40`}" class="w-8 h-8 rounded-full border border-gray-700" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=475569&color=fff'">
-                                <div>
-                                    <span class="text-sm font-semibold text-white">${user.displayName}</span>
-                                    ${isCurrentUser ? '<span class="ml-2 text-[10px] bg-wc-gold/20 text-wc-gold px-1.5 py-0.5 rounded font-bold">YOU</span>' : ''}
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="text-wc-gold font-bold">${user.exactScores || 0}</span>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="text-emerald-400 font-bold">${user.outcomeScores || 0}</span>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="text-lg font-black text-white">${user.totalScore || 0}</span>
-                        </td>
-                    </tr>`;
-            });
-
-            html += `</tbody></table></div></div>`;
-        }
-
-        container.innerHTML = html;
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🎨 UI: ADMIN PANEL                                              ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function renderAdminPanel() {
-        const container = document.getElementById('admin-view');
-        let html = '';
-
-        html += `
-        <div class="animate-fade-in">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold"><i class="fas fa-shield-halved text-wc-gold mr-2"></i>Admin Panel</h2>
-                    <p class="text-sm text-gray-400">Submit match results and manage the tournament</p>
-                </div>
-                <button onclick="recalculateAllScores()"
-                    class="flex items-center gap-2 px-4 py-2 bg-wc-gold text-gray-900 font-bold rounded-lg hover:bg-amber-400 transition-colors text-sm">
-                    <i class="fas fa-calculator"></i>
-                    <span class="hidden sm:inline">Recalculate</span> All Scores
-                </button>
-            </div>`;
-
-        // Stats
-        const totalMatches = ALL_MATCHES.length;
-        const completed = Object.values(state.dbMatches).filter(m => m.isCompleted).length;
-        const remaining = totalMatches - completed;
-
-        html += `
-        <div class="grid grid-cols-3 gap-3 mb-6">
-            <div class="glass-card rounded-xl p-3 text-center">
-                <p class="text-xl font-bold text-white">${totalMatches}</p>
-                <p class="text-xs text-gray-400">Total Matches</p>
-            </div>
-            <div class="glass-card rounded-xl p-3 text-center">
-                <p class="text-xl font-bold text-emerald-400">${completed}</p>
-                <p class="text-xs text-gray-400">Completed</p>
-            </div>
-            <div class="glass-card rounded-xl p-3 text-center">
-                <p class="text-xl font-bold text-amber-400">${remaining}</p>
-                <p class="text-xs text-gray-400">Remaining</p>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  UI: ADMIN PANEL (Results + User Score Editing)                   ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function renderAdminPanel(){
+    const c=document.getElementById('admin-view');
+    let h=`<div class="animate-fade-in">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+            <div><h2 class="text-2xl font-bold"><i class="fas fa-shield-halved text-wc-gold mr-2"></i>Admin Panel</h2>
+            <p class="text-sm text-gray-400">Submit results & manage scores</p></div>
+            <div class="flex gap-2">
+                <button onclick="recalculateAllScores()" class="flex items-center gap-2 px-4 py-2 bg-wc-gold text-gray-900 font-bold rounded-lg hover:bg-amber-400 transition-colors text-sm"><i class="fas fa-calculator"></i><span class="hidden sm:inline">Recalculate</span> Scores</button>
             </div>
         </div>`;
 
-        // Filter by stage
-        const stages = ['group', 'Round of 32', 'Round of 16', 'Quarterfinals', 'Semifinals', 'Third Place', 'Final'];
-        const stageLabels = { 'group': 'Group Stage' };
+    // Stats
+    const total=ALL_MATCHES.length, done=Object.values(state.dbMatches).filter(m=>m.isCompleted).length;
+    h+=`<div class="grid grid-cols-3 gap-3 mb-8">
+        <div class="glass-card rounded-xl p-3 text-center"><p class="text-xl font-bold text-white">${total}</p><p class="text-xs text-gray-400">Total</p></div>
+        <div class="glass-card rounded-xl p-3 text-center"><p class="text-xl font-bold text-emerald-400">${done}</p><p class="text-xs text-gray-400">Completed</p></div>
+        <div class="glass-card rounded-xl p-3 text-center"><p class="text-xl font-bold text-amber-400">${total-done}</p><p class="text-xs text-gray-400">Remaining</p></div>
+    </div>`;
 
-        for (const stage of stages) {
-            const stageMatches = ALL_MATCHES.filter(m => m.stage === stage);
-            if (stageMatches.length === 0) continue;
+    // ── Tab switcher inside admin: Results vs Users ──
+    h+=`<div class="flex gap-2 mb-4">
+        <button onclick="showAdminTab('results')" id="admin-tab-results" class="px-4 py-2 rounded-lg text-sm font-semibold bg-wc-gold/20 text-wc-gold"><i class="fas fa-futbol mr-1"></i>Match Results</button>
+        <button onclick="showAdminTab('users')" id="admin-tab-users" class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-700 text-gray-400"><i class="fas fa-users mr-1"></i>Edit User Scores</button>
+    </div>`;
 
-            const label = stageLabels[stage] || stage;
-            const stageCompleted = stageMatches.filter(m => state.dbMatches[m.id]?.isCompleted).length;
-
-            html += `
-            <div class="mb-4 glass-card rounded-xl overflow-hidden">
-                <div class="px-4 py-3 border-b border-wc-border/50 flex items-center justify-between">
-                    <h4 class="text-sm font-bold text-gray-300">${label} <span class="text-gray-600">(${stageCompleted}/${stageMatches.length})</span></h4>
-                    ${stageCompleted === stageMatches.length && stageMatches.length > 0 ? '<span class="text-xs text-emerald-400"><i class="fas fa-check-circle mr-1"></i>All complete</span>' : ''}
-                </div>
-                <div class="p-3 space-y-2">`;
-
-            for (const match of stageMatches) {
-                const dbM = state.dbMatches[match.id] || {};
-                const isCompleted = dbM.isCompleted;
-
-                html += `
-                <div class="bg-gray-800/30 rounded-lg p-3 ${isCompleted ? 'border border-emerald-500/20' : ''}">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <!-- Match Info -->
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xs font-bold text-gray-500">${match.id}</span>
-                                <span class="text-xs text-gray-600">${formatDateShort(new Date(match.date))} &middot; ${formatTime(new Date(match.date))}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm">
-                                <img src="${getFlagUrl(match.teamA)}" class="w-5 h-4 rounded-sm" onerror="this.style.display='none'">
-                                <span class="font-semibold text-gray-300">${match.teamA}</span>
-                                <span class="text-gray-600">vs</span>
-                                <span class="font-semibold text-gray-300">${match.teamB}</span>
-                                <img src="${getFlagUrl(match.teamB)}" class="w-5 h-4 rounded-sm" onerror="this.style.display='none'">
-                            </div>
+    // Results section
+    h+=`<div id="admin-results-section">`;
+    const stages=['group','Round of 32','Round of 16','Quarterfinals','Semifinals','Third Place','Final'];
+    const sLabels={group:'Group Stage'};
+    for(const st of stages){
+        const sm=ALL_MATCHES.filter(m=>m.stage===st);
+        if(!sm.length)continue;
+        const label=sLabels[st]||st;
+        const stDone=sm.filter(m=>state.dbMatches[m.id]?.isCompleted).length;
+        h+=`<div class="mb-4 glass-card rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-wc-border/50 flex items-center justify-between">
+                <h4 class="text-sm font-bold text-gray-300">${label} <span class="text-gray-600">(${stDone}/${sm.length})</span></h4>
+                ${stDone===sm.length?'<span class="text-xs text-emerald-400"><i class="fas fa-check-circle mr-1"></i>Done</span>':''}
+            </div><div class="p-3 space-y-2">`;
+        for(const m of sm){
+            const dbM=state.dbMatches[m.id]||{}, isDone=dbM.isCompleted;
+            h+=`<div class="bg-gray-800/30 rounded-lg p-3 ${isDone?'border border-emerald-500/20':''}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold text-gray-500">${m.id}</span>
+                            <span class="text-xs text-gray-600">${fmtDate(new Date(m.date))} · ${fmtTime(new Date(m.date))}</span>
                         </div>
-
-                        <!-- Result Input -->
-                        ${isCompleted ? `
-                            <div class="flex items-center gap-2">
-                                <span class="text-lg font-black text-emerald-400">${dbM.scoreA} - ${dbM.scoreB}</span>
-                                <button onclick="clearResult('${match.id}')"
-                                    class="text-xs px-2 py-1 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                                    title="Clear result">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        ` : `
-                            <div class="flex items-center gap-1.5">
-                                <input type="number" min="0" max="99" id="admin-${match.id}-A"
-                                    class="score-input !w-14 !h-10 text-base" placeholder="-">
-                                <span class="text-gray-500 font-light text-lg">-</span>
-                                <input type="number" min="0" max="99" id="admin-${match.id}-B"
-                                    class="score-input !w-14 !h-10 text-base" placeholder="-">
-                                <button onclick="submitAdminResult('${match.id}')"
-                                    class="px-3 py-2 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-500/30 transition-colors">
-                                    <i class="fas fa-check mr-1"></i>Set
-                                </button>
-                            </div>
-                        `}
+                        <div class="flex items-center gap-2 text-sm">
+                            <img src="${flagUrl(m.tA)}" class="w-5 h-4 rounded-sm" onerror="this.style.display='none'">
+                            <span class="font-semibold text-gray-300">${m.tA}</span>
+                            <span class="text-gray-600">vs</span>
+                            <span class="font-semibold text-gray-300">${m.tB}</span>
+                            <img src="${flagUrl(m.tB)}" class="w-5 h-4 rounded-sm" onerror="this.style.display='none'">
+                        </div>
                     </div>
-                </div>`;
-            }
-
-            html += `</div></div>`;
+                    ${isDone?`<div class="flex items-center gap-2">
+                        <span class="text-lg font-black text-emerald-400">${dbM.scoreA} - ${dbM.scoreB}</span>
+                        <button onclick="clearResult('${m.id}')" class="text-xs px-2 py-1 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" title="Clear"><i class="fas fa-times"></i></button>
+                    </div>`
+                    :`<div class="flex items-center gap-1.5">
+                        <input type="number" min="0" max="99" id="admin-${m.id}-A" class="score-input !w-14 !h-10 text-base" placeholder="-">
+                        <span class="text-gray-500 text-lg">-</span>
+                        <input type="number" min="0" max="99" id="admin-${m.id}-B" class="score-input !w-14 !h-10 text-base" placeholder="-">
+                        <button onclick="submitAdminResult('${m.id}')" class="px-3 py-2 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-500/30 transition-colors"><i class="fas fa-check mr-1"></i>Set</button>
+                    </div>`}
+                </div></div>`;
         }
-
-        html += `</div>`;
-        container.innerHTML = html;
+        h+=`</div></div>`;
     }
+    h+=`</div>`;
 
-    function submitAdminResult(matchId) {
-        const inputA = document.getElementById(`admin-${matchId}-A`);
-        const inputB = document.getElementById(`admin-${matchId}-B`);
-        if (!inputA || !inputB) return;
-        submitResult(matchId, inputA.value, inputB.value);
-    }
+    // User scores section (hidden by default)
+    h+=`<div id="admin-users-section" class="hidden">
+        <div class="glass-card rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-wc-border/50">
+                <h4 class="text-sm font-bold text-gray-300"><i class="fas fa-users mr-2"></i>All Users — Edit Scores Manually</h4>
+                <p class="text-xs text-gray-500 mt-1">Use this to import scores from another app. Changes take effect immediately.</p>
+            </div>
+            <div class="p-3 space-y-2">`;
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🎨 UI: TOAST NOTIFICATIONS                                      ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        const colors = {
-            success: 'bg-emerald-500/90 border-emerald-400',
-            error: 'bg-red-500/90 border-red-400',
-            info: 'bg-blue-500/90 border-blue-400',
-            warning: 'bg-amber-500/90 border-amber-400',
-        };
-        const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-exclamation-circle',
-            info: 'fa-info-circle',
-            warning: 'fa-exclamation-triangle',
-        };
-
-        const toast = document.createElement('div');
-        toast.className = `toast-enter flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg border ${colors[type]} backdrop-blur-sm max-w-sm`;
-        toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(10px)';
-            toast.style.transition = 'all 0.3s';
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🎨 UI: LOADING OVERLAY                                          ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    function showLoading(text = 'Loading...') {
-        state.loading = true;
-        document.getElementById('loading-text').textContent = text;
-        document.getElementById('loading-overlay').classList.remove('hidden');
-    }
-
-    function hideLoading() {
-        state.loading = false;
-        document.getElementById('loading-overlay').classList.add('hidden');
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🔧 UTILITIES                                                    ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-
-    function getFlagUrl(teamName) {
-        const code = COUNTRY_CODES[teamName] || 'un';
-        return `https://flagcdn.com/w40/${code}.png`;
-    }
-
-    function formatDateShort(date) {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${months[date.getUTCMonth()]} ${date.getUTCDate()}`;
-    }
-
-    function formatTime(date) {
-        let h = date.getUTCHours();
-        let m = date.getUTCMinutes();
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        return `${h}:${m.toString().padStart(2, '0')} ${ampm} UTC`;
-    }
-
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🚀 PERIODIC REFRESH (re-render to update lock states)           ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    setInterval(() => {
-        if (state.user && state.activeTab === 'predictions') {
-            renderPredictions();
+    if(!state.users.length){
+        h+=`<p class="text-gray-500 text-center py-4">No users registered yet.</p>`;
+    } else {
+        for(const u of state.users){
+            h+=`<div class="bg-gray-800/30 rounded-lg p-3 ${u.id===state.user.uid?'border border-wc-gold/30':''}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <img src="${u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=475569&color=fff&size=40`}" class="w-10 h-10 rounded-full border border-gray-700" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName)}&background=475569&color=fff'">
+                        <div>
+                            <p class="text-sm font-semibold text-white">${u.displayName} ${u.id===state.user.uid?'<span class="text-[10px] bg-wc-gold/20 text-wc-gold px-1.5 py-0.5 rounded font-bold ml-1">ADMIN</span>':''}</p>
+                            <p class="text-xs text-gray-500">${u.email||''}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-1">
+                            <label class="text-[10px] text-gray-500 uppercase">Exact</label>
+                            <input type="number" min="0" id="score-exact-${u.id}" value="${u.exactScores||0}" class="admin-score-input !w-16 !h-9 text-sm">
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <label class="text-[10px] text-gray-500 uppercase">Outcome</label>
+                            <input type="number" min="0" id="score-outcome-${u.id}" value="${u.outcomeScores||0}" class="admin-score-input !w-16 !h-9 text-sm">
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <label class="text-[10px] text-wc-gold uppercase font-bold">Total</label>
+                            <input type="number" min="0" id="score-total-${u.id}" value="${u.totalScore||0}" class="admin-score-input !w-16 !h-9 text-sm !border-wc-gold/40 !text-wc-gold">
+                        </div>
+                        <button onclick="saveUserScores('${u.id}')" class="px-3 py-2 bg-wc-gold/20 text-wc-gold text-xs font-bold rounded-lg hover:bg-wc-gold/30 transition-colors">
+                            <i class="fas fa-save mr-1"></i>Save
+                        </button>
+                    </div>
+                </div></div>`;
         }
-    }, 60000); // Refresh every 60 seconds to update lock states
+    }
+    h+=`</div></div></div>`;
 
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🚀 INITIALIZATION                                               ║
-    // ╚══════════════════════════════════════════════════════════════════╝
-    console.log(`🏆 2026 World Cup Predictor loaded with ${ALL_MATCHES.length} matches`);
-    </script>
+    h+=`</div>`;
+    c.innerHTML=h;
+}
+
+function showAdminTab(tab){
+    const res=document.getElementById('admin-results-section');
+    const usr=document.getElementById('admin-users-section');
+    const tRes=document.getElementById('admin-tab-results');
+    const tUsr=document.getElementById('admin-tab-users');
+    if(tab==='results'){
+        res.classList.remove('hidden');usr.classList.add('hidden');
+        tRes.className='px-4 py-2 rounded-lg text-sm font-semibold bg-wc-gold/20 text-wc-gold';
+        tUsr.className='px-4 py-2 rounded-lg text-sm font-semibold bg-gray-700 text-gray-400';
+    } else {
+        res.classList.add('hidden');usr.classList.remove('hidden');
+        tUsr.className='px-4 py-2 rounded-lg text-sm font-semibold bg-wc-gold/20 text-wc-gold';
+        tRes.className='px-4 py-2 rounded-lg text-sm font-semibold bg-gray-700 text-gray-400';
+    }
+}
+
+function submitAdminResult(id){
+    const a=document.getElementById(`admin-${id}-A`),b=document.getElementById(`admin-${id}-B`);
+    if(a&&b)submitResult(id,a.value,b.value);
+}
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  TOAST / LOADING / UTILITIES                                      ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const colors={success:'bg-emerald-500/90 border-emerald-400',error:'bg-red-500/90 border-red-400',info:'bg-blue-500/90 border-blue-400',warning:'bg-amber-500/90 border-amber-400'};
+    const icons={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle',warning:'fa-exclamation-triangle'};
+    const t=document.createElement('div');
+    t.className=`toast-enter flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg border ${colors[type]} backdrop-blur-sm max-w-sm`;
+    t.innerHTML=`<i class="fas ${icons[type]}"></i><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(10px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300);},3500);
+}
+
+function showLoading(t='Loading...'){state.loading=true;document.getElementById('loading-text').textContent=t;document.getElementById('loading-overlay').classList.remove('hidden');}
+function hideLoading(){state.loading=false;document.getElementById('loading-overlay').classList.add('hidden');}
+
+function flagUrl(team){const code=FLAGS[team]||'un';return`https://flagcdn.com/w40/${code}.png`;}
+
+function fmtDate(d){const m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return`${m[d.getUTCMonth()]} ${d.getUTCDate()}`;}
+function fmtTime(d){let h=d.getUTCHours(),min=d.getUTCMinutes();const ampm=h>=12?'PM':'AM';h=h%12||12;return`${h}:${String(min).padStart(2,'0')} ${ampm} UTC`;}
+
+// Refresh lock states every 60s
+setInterval(()=>{if(state.user&&state.activeTab==='predictions')renderPredictions();},60000);
+
+console.log(`🏆 Polla Mundial 2026 — ${ALL_MATCHES.length} matches loaded`);
+console.log(`📊 Pre-loaded results: ${ALL_MATCHES.filter(m=>m.done).length} completed matches`);
+</script>
 </body>
 </html>
